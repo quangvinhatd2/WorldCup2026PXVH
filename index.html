@@ -874,7 +874,124 @@ function switchTab(tab, btn) {
   if(btn) btn.classList.add('active');
   else document.querySelector('.nbtn').classList.add('active');
 }
+// =======================
+// 🌍 DANH SÁCH WORLD CUP
+// =======================
+const WORLD_CUP_TEAMS = [
+  "Mexico","Hàn Quốc","Canada","Mỹ","Haiti","Australia",
+  "Brazil","Qatar","Bờ Biển Ngà","Đức","Hà Lan","Thụy Điển",
+  "Ả Rập Xê Út","Nam Phi","CH Séc","Bosnia","Paraguay","Scotland",
+  "Thổ Nhĩ Kỳ","Ma Rốc","Thụy Sĩ","Ecuador","Curacao","Nhật Bản",
+  "Tunisia","Uruguay","Cape Verde","New Zealand","Ai Cập",
+  "Senegal","Na Uy","Algeria","Jordan","Panama","Croatia",
+  "Congo","Colombia","Iran","Iraq","Áo","Ghana",
+  "Uzbekistan","Pháp","Bỉ","Tây Ban Nha","Anh",
+  "Argentina","Bồ Đào Nha"
+];
 
+// =======================
+// 🧠 MAP TÊN ĐỘI
+// =======================
+function normalizeTeam(name) {
+  const map = {
+    "USA": "Mỹ",
+    "United States": "Mỹ",
+
+    "Korea Republic": "Hàn Quốc",
+    "South Korea": "Hàn Quốc",
+    "Südkorea": "Hàn Quốc",
+
+    "Czech Republic": "CH Séc",
+    "Tschechien": "CH Séc",
+
+    "Ivory Coast": "Bờ Biển Ngà",
+    "Côte d'Ivoire": "Bờ Biển Ngà",
+
+    "Saudi Arabia": "Ả Rập Xê Út",
+    "Morocco": "Ma Rốc",
+    "Switzerland": "Thụy Sĩ",
+    "Japan": "Nhật Bản",
+    "Egypt": "Ai Cập",
+    "Norway": "Na Uy",
+    "Austria": "Áo",
+
+    "England": "Anh",
+    "Spain": "Tây Ban Nha",
+    "Portugal": "Bồ Đào Nha",
+    "Belgium": "Bỉ",
+    "France": "Pháp"
+  };
+
+  return map[name] || name;
+}
+
+// =======================
+// ⚽ XỬ LÝ DATA MATCH
+// =======================
+function processMatches(list) {
+  list.forEach(item => {
+    const status = item.fixture.status.short;
+
+    // 🔥 chỉ lấy trận kết thúc
+    if (!["FT", "AET", "PEN"].includes(status)) return;
+
+    const teamA = normalizeTeam(item.teams.home.name);
+    const teamB = normalizeTeam(item.teams.away.name);
+
+    // 🔥 lọc đúng World Cup
+    if (!WORLD_CUP_TEAMS.includes(teamA) || !WORLD_CUP_TEAMS.includes(teamB)) {
+      console.warn("⛔ Bỏ qua:", teamA, teamB);
+      return;
+    }
+
+    const sA = item.goals.home;
+    const sB = item.goals.away;
+
+    console.log(`👉 Match: ${teamA} ${sA}-${sB} ${teamB}`);
+
+    updateMatchResult(teamA, teamB, sA, sB);
+  });
+}
+
+// =======================
+// 🌐 AUTO UPDATE
+// =======================
+async function autoUpdateResults() {
+  console.log("⏳ Auto update đang chạy...");
+
+  try {
+    const res = await fetch("https://api-football-v1.p.rapidapi.com/v3/fixtures?season=2026", {
+      headers: {
+        "X-RapidAPI-Key": "YOUR_API_KEY"
+      }
+    });
+
+    const data = await res.json();
+
+    if (!data.response) throw new Error("No data");
+
+    processMatches(data.response);
+
+  } catch (err) {
+    console.warn("⚠️ API lỗi → dùng dữ liệu giả");
+
+    // 🔥 fallback demo
+    const fakeData = [
+      {
+        teams: { home: { name: "USA" }, away: { name: "Canada" } },
+        goals: { home: 2, away: 1 },
+        fixture: { status: { short: "FT" } }
+      },
+      {
+        teams: { home: { name: "Südkorea" }, away: { name: "Tschechien" } },
+        goals: { home: 1, away: 1 },
+        fixture: { status: { short: "FT" } }
+      }
+    ];
+
+    processMatches(fakeData);
+  }
+}
 // =======================
 // INIT
 // =======================
