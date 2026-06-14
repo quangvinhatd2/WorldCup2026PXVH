@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dự Đoán World Cup 2026 | BXH & Thống Kê</title>
+<title>Dự Đoán World Cup 2026 | Tự động cập nhật kết quả</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -17,8 +17,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-
-/* HEADER */
 .header{background:linear-gradient(135deg,var(--green-dark) 0%,var(--bg) 60%);border-bottom:1px solid var(--border2);position:relative;overflow:hidden;}
 .header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(240,180,41,0.03) 40px,rgba(240,180,41,0.03) 41px);pointer-events:none;}
 .header-inner{max-width:1200px;margin:0 auto;padding:20px 32px 16px;display:flex;align-items:center;gap:16px;position:relative;z-index:1;}
@@ -29,12 +27,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .header-nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
 .nav-btn{background:transparent;border:1px solid var(--border2);color:var(--text2);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;transition:all .2s;font-weight:500;}
 .nav-btn:hover,.nav-btn.active{background:var(--gold);border-color:var(--gold);color:var(--bg);}
-
-/* MAIN */
 .main{max-width:1200px;margin:0 auto;padding:24px 32px;}
 .tab-content{display:none;}.tab-content.active{display:block;}
-
-/* UPLOAD */
 .upload-zone{border:2px dashed var(--border2);border-radius:16px;padding:40px 32px;text-align:center;cursor:pointer;transition:all .3s;background:var(--bg2);margin-bottom:24px;}
 .upload-zone:hover,.upload-zone.drag-over{border-color:var(--gold);background:var(--bg3);}
 .upload-zone h3{color:var(--gold);font-size:17px;margin-bottom:6px;}
@@ -42,8 +36,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .upload-zone input{display:none;}
 .upload-btn{display:inline-block;margin-top:14px;padding:10px 28px;background:var(--gold);color:var(--bg);border:none;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
 .upload-btn:hover{background:var(--gold-light);}
-
-/* PLAYERS */
 .players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:24px;}
 .player-chip{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;position:relative;}
 .player-chip .avatar{width:34px;height:34px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--gold);flex-shrink:0;}
@@ -51,16 +43,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .player-chip .matches{font-size:11px;color:var(--text2);}
 .player-chip .remove-btn{position:absolute;top:4px;right:6px;background:none;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:13px;padding:2px;transition:color .2s;}
 .player-chip .remove-btn:hover{color:var(--red);}
-
-/* SECTION TITLE */
 .section-title{font-size:17px;font-weight:700;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
-
-/* ROUND SELECTOR */
 .round-selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
 .round-btn{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:7px 15px;border-radius:20px;cursor:pointer;font-size:13px;transition:all .2s;font-weight:500;}
 .round-btn.active{background:var(--green);border-color:var(--green-light);color:#fff;}
-
-/* MATCHES TABLE */
 .matches-table-wrap{overflow-x:auto;border-radius:12px;}
 .matches-table{width:100%;border-collapse:collapse;background:var(--bg2);font-size:14px;}
 .matches-table th{background:var(--surface2);color:var(--gold);padding:11px 12px;text-align:center;font-weight:600;font-size:11px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border2);}
@@ -80,8 +66,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .status-done{background:rgba(37,168,85,0.2);color:var(--green-light);}
 .status-pending{background:rgba(255,255,255,0.07);color:var(--text3);}
 .match-round-tag{font-size:11px;padding:2px 8px;border-radius:8px;font-weight:600;background:var(--surface);color:var(--text2);}
-
-/* FINAL BONUS PANEL */
 .final-bonus-panel{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:22px;margin-top:24px;}
 .final-bonus-panel h3{color:var(--gold);font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
 .final-inputs-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
@@ -96,33 +80,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .guide-row:last-child{border-bottom:none;}
 .guide-pts.pos{color:var(--green-light);font-weight:700;}
 .guide-pts.neg{color:#f87171;font-weight:700;}
-
-/* SAVE BAR */
-.save-bar{display:flex;justify-content:flex-end;gap:12px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);}
+.save-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);}
 .btn-primary{background:var(--gold);color:var(--bg);border:none;padding:11px 28px;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
 .btn-primary:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 4px 12px rgba(240,180,41,0.3);}
 .btn-secondary{background:transparent;color:var(--text2);border:1px solid var(--border2);padding:11px 28px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
 .btn-secondary:hover{background:var(--surface);}
-
-/* DASHBOARD */
+.sync-status{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:8px;}
 .announce-banner{background:linear-gradient(135deg,var(--green-dark),var(--bg2));border:1px solid var(--border2);border-radius:16px;padding:22px 26px;margin-bottom:22px;display:none;position:relative;overflow:hidden;}
-.announce-banner::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(240,180,41,0.15),transparent 70%);pointer-events:none;}
 .announce-banner.show{display:flex;align-items:flex-start;gap:18px;}
 .announce-icon{font-size:42px;flex-shrink:0;}
 .announce-text h2{font-size:20px;color:var(--gold);font-weight:700;margin-bottom:4px;}
 .announce-text p{font-size:13px;color:var(--text2);line-height:1.6;}
 .announce-highlights{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;}
 .highlight-chip{background:rgba(240,180,41,0.1);border:1px solid rgba(240,180,41,0.3);border-radius:10px;padding:7px 13px;font-size:12px;color:var(--gold-light);}
-.highlight-chip strong{color:var(--gold);}
-
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 16px;text-align:center;transition:transform .2s;}
 .stat-card:hover{transform:translateY(-2px);border-color:var(--border2);}
 .stat-icon{font-size:26px;margin-bottom:7px;}
 .stat-val{font-size:26px;font-weight:800;color:var(--gold);line-height:1;}
 .stat-label{font-size:11px;color:var(--text2);margin-top:5px;letter-spacing:.5px;}
-
-/* LEADERBOARD */
 .leaderboard{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:22px;}
 .lb-header{background:var(--surface2);padding:13px 18px;display:grid;grid-template-columns:48px 1fr 70px 70px 70px 70px 80px 80px;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold);border-bottom:1px solid var(--border2);}
 .lb-header span:not(:first-child):not(:nth-child(2)){text-align:center;}
@@ -144,42 +120,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .lb-score{text-align:center;font-weight:800;font-size:19px;}
 .lb-bonus{text-align:center;font-size:13px;font-weight:600;}
 .score-pos{color:var(--green-light);}.score-neg{color:#f87171;}.score-zero{color:var(--text3);}
-
-/* CHARTS */
 .charts-row{display:grid;grid-template-columns:1.3fr 0.7fr;gap:18px;margin-bottom:22px;}
 .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;}
 .chart-title{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:14px;}
-
-/* EXTRA CHARTS */
 .extra-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;margin-top:8px;}
-
-/* RECENT */
 .recent-matches{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:22px;}
 .match-result-row{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);gap:10px;}
 .match-result-row:last-child{border-bottom:none;}
 .match-badge{font-size:11px;color:var(--text3);width:22px;text-align:center;font-weight:600;}
 .match-teams{flex:1;font-size:13px;color:var(--text);}
 .match-score-actual{font-size:17px;font-weight:800;color:var(--gold);min-width:60px;text-align:center;}
-
-/* BONUS SUMMARY CARD */
-.bonus-summary{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:18px;margin-bottom:22px;}
-.bonus-summary h3{color:var(--gold);font-size:14px;font-weight:700;margin-bottom:12px;}
-.bonus-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;}
-.bonus-row:last-child{border-bottom:none;}
-.bonus-pts.pos{color:var(--green-light);font-weight:700;}
-.bonus-pts.neg{color:#f87171;font-weight:700;}
-
-/* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:13px 22px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.4);transform:translateY(80px);opacity:0;transition:all .3s;z-index:9999;display:flex;align-items:center;gap:10px;max-width:360px;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.error{background:var(--red);}
-
-/* EMPTY */
 .empty-state{text-align:center;padding:52px 20px;color:var(--text2);}
 .empty-state .icon{font-size:56px;margin-bottom:14px;opacity:.5;}
 .empty-state h3{font-size:17px;color:var(--text3);margin-bottom:7px;}
-.empty-state p{font-size:13px;}
-
 @media(max-width:768px){
   .header-inner{flex-wrap:wrap;padding:14px 14px 10px;}
   .header-nav{width:100%;}
@@ -200,7 +156,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div class="trophy">🏆</div>
     <div class="header-text">
       <h1>DỰ ĐOÁN KẾT QUẢ WORLDCUP 2026</h1>
-      <p>⚽ Bảng Xếp Hạng & Thống Kê Trực Tiếp | Lưu tự động</p>
+      <p>⚽ Bảng Xếp Hạng & Thống Kê Trực Tiếp | Tự động cập nhật kết quả từ API</p>
     </div>
     <nav class="header-nav">
       <button class="nav-btn active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
@@ -211,8 +167,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 </header>
 
 <main class="main">
-
-<!-- ====== DASHBOARD ====== -->
 <div id="tab-dashboard" class="tab-content active">
   <div class="announce-banner" id="announceBanner">
     <div class="announce-icon" id="announceIcon">🎉</div>
@@ -222,56 +176,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <div class="announce-highlights" id="announceHighlights"></div>
     </div>
   </div>
-
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-val" id="statPlayers">0</div><div class="stat-label">Người tham gia</div></div>
     <div class="stat-card"><div class="stat-icon">⚽</div><div class="stat-val" id="statMatches">0</div><div class="stat-label">Trận đã cập nhật</div></div>
     <div class="stat-card"><div class="stat-icon">🏅</div><div class="stat-val" id="statBest">—</div><div class="stat-label">Điểm cao nhất</div></div>
     <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-val" id="statMoney">—</div><div class="stat-label">Tiền dẫn đầu (k)</div></div>
   </div>
-
   <div class="section-title">🥇 Bảng Xếp Hạng</div>
-  <div class="leaderboard">
-    <div class="lb-header">
-      <span>#</span><span>Người chơi</span>
-      <span>Điểm</span><span>Đúng đội</span><span>Đúng tỷ số</span><span>Sai</span>
-      <span>Thưởng CK</span><span>Tiền (k)</span>
-    </div>
-    <div id="lbBody">
-      <div class="empty-state"><div class="icon">📋</div><h3>Chưa có dữ liệu</h3><p>Upload file Excel và nhập kết quả để xem bảng xếp hạng</p></div>
-    </div>
-  </div>
-
-  <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-title">📈 Điểm số người chơi</div>
-      <div style="position:relative;height:250px;"><canvas id="chartScores" role="img" aria-label="Biểu đồ điểm số"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">🎯 Tỷ lệ dự đoán (tổng)</div>
-      <div style="position:relative;height:250px;"><canvas id="chartAccuracy" role="img" aria-label="Biểu đồ tỷ lệ chính xác"></canvas></div>
-    </div>
-  </div>
-
-  <!-- EXTRA CHARTS: thêm đồ thị hấp dẫn -->
-  <div class="extra-charts-grid" id="extraChartsGrid">
-    <div class="chart-card">
-      <div class="chart-title">🏆 Top 5 dự đoán vô địch</div>
-      <div style="position:relative;height:220px;"><canvas id="championPredChart"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">🎁 Phân bố điểm thưởng chung kết</div>
-      <div style="position:relative;height:220px;"><canvas id="bonusDistChart"></canvas></div>
-    </div>
-  </div>
-
-  <div class="recent-matches" id="recentPanel" style="display:none;">
-    <div class="section-title" style="margin-bottom:12px;">🕐 Kết Quả Gần Nhất</div>
-    <div id="recentList"></div>
-  </div>
+  <div class="leaderboard"><div class="lb-header"><span>#</span><span>Người chơi</span><span>Điểm</span><span>Đúng đội</span><span>Đúng tỷ số</span><span>Sai</span><span>Thưởng CK</span><span>Tiền (k)</span></div><div id="lbBody"><div class="empty-state"><div class="icon">📋</div><h3>Chưa có dữ liệu</h3><p>Upload file Excel và nhập kết quả để xem bảng xếp hạng</p></div></div></div>
+  <div class="charts-row"><div class="chart-card"><div class="chart-title">📈 Điểm số người chơi</div><div style="position:relative;height:250px;"><canvas id="chartScores"></canvas></div></div><div class="chart-card"><div class="chart-title">🎯 Tỷ lệ dự đoán (tổng)</div><div style="position:relative;height:250px;"><canvas id="chartAccuracy"></canvas></div></div></div>
+  <div class="extra-charts-grid"><div class="chart-card"><div class="chart-title">🏆 Top 5 dự đoán vô địch</div><div style="height:220px;"><canvas id="championPredChart"></canvas></div></div><div class="chart-card"><div class="chart-title">🎁 Phân bố điểm thưởng chung kết</div><div style="height:220px;"><canvas id="bonusDistChart"></canvas></div></div></div>
+  <div class="recent-matches" id="recentPanel" style="display:none;"><div class="section-title" style="margin-bottom:12px;">🕐 Kết Quả Gần Nhất</div><div id="recentList"></div></div>
 </div>
 
-<!-- ====== MATCHES ====== -->
 <div id="tab-matches" class="tab-content">
   <div class="section-title">⚽ Nhập Kết Quả Thực Tế</div>
   <div class="round-selector">
@@ -284,13 +201,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <button class="round-btn" onclick="filterRound('Chung kết',this)">Chung kết</button>
   </div>
   <div class="matches-table-wrap">
-    <table class="matches-table" id="matchesTable">
-      <thead><tr><th>#</th><th style="text-align:right">Đội nhà</th><th colspan="3" style="text-align:center">Kết quả thực tế</th><th style="text-align:left">Đội khách</th><th>Vòng</th><th>Trạng thái</th></tr></thead>
-      <tbody id="matchesTbody"></tbody>
-    </table>
+    <table class="matches-table" id="matchesTable"><thead><tr><th>#</th><th style="text-align:right">Đội nhà</th><th colspan="3" style="text-align:center">Kết quả thực tế</th><th style="text-align:left">Đội khách</th><th>Vòng</th><th>Trạng thái</th></tr></thead><tbody id="matchesTbody"></tbody></table>
     <div id="noMatchesMsg" class="empty-state" style="display:none;"><div class="icon">⚽</div><h3>Chưa có danh sách trận đấu</h3><p>Upload file Excel của người chơi để lấy danh sách trận đấu</p></div>
   </div>
-
   <div class="final-bonus-panel">
     <h3>🏆 Kết quả thực tế — Chung kết & Vô địch</h3>
     <div class="final-inputs-grid">
@@ -299,10 +212,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     </div>
     <div class="scoring-guide"><h4>📋 Thang điểm thưởng chung kết</h4><div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:4px 0 8px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:6px;">🥈🥇 Finalist — 2 đội vào chung kết</div><div class="guide-row"><span>🎯 Đúng cả 2 đội</span><span class="guide-pts pos">+10đ</span></div><div class="guide-row"><span>✅ Đúng 1 đội</span><span class="guide-pts pos">+5đ</span></div><div class="guide-row"><span>❌ Sai cả 2</span><span class="guide-pts neg">−5đ</span></div><div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:10px 0 8px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:6px;">🏆 Champion — đội vô địch</div><div class="guide-row"><span>🏆 Đúng đội vô địch</span><span class="guide-pts pos">+10đ</span></div><div class="guide-row"><span>😅 Sai — đội đó vào chung kết</span><span class="guide-pts neg">−3đ</span></div><div class="guide-row"><span>❌ Sai — đội đó không vào chung kết</span><span class="guide-pts neg">−5đ</span></div></div>
   </div>
-  <div class="save-bar"><button class="btn-secondary" onclick="resetFormAndReload()">🔄 Reset form</button><button class="btn-primary" onclick="manualSaveAll()">💾 Lưu & Tính điểm</button></div>
+  <div class="save-bar">
+    <div class="sync-status"><span>🔄 Tự động cập nhật mỗi 5 phút</span><button class="btn-secondary" style="padding:5px 12px;" onclick="manualSyncFromAPI()">Đồng bộ từ API</button></div>
+    <div><button class="btn-secondary" onclick="resetFormAndReload()">🔄 Reset form</button><button class="btn-primary" onclick="manualSaveAll()">💾 Lưu & Tính điểm</button></div>
+  </div>
 </div>
 
-<!-- ====== PLAYERS ====== -->
 <div id="tab-players" class="tab-content">
   <div class="section-title">👥 Quản Lý Người Chơi</div>
   <div class="upload-zone" id="dropZone"><div style="font-size:44px;margin-bottom:10px;">📁</div><h3>Kéo thả file Excel vào đây</h3><p>Hỗ trợ .xlsx — mỗi file là 1 người chơi</p><p style="margin-top:5px;font-size:12px;color:var(--text3);">Chọn nhiều file cùng lúc (tất cả 27 file)</p><input type="file" id="fileInput" multiple accept=".xlsx,.xls"><button class="upload-btn" onclick="document.getElementById('fileInput').click()">📤 Chọn file</button></div>
@@ -313,45 +228,32 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="toast" id="toast"><span id="toastIcon">✅</span><span id="toastMsg">Đã lưu!</span></div>
 
 <script>
-// ═════ PERSISTENCE & AUTO-SAVE ═════
-const STORAGE_KEY = "WorldCup2026_AppData";
-let state = { players: [], matches: [], results: {}, finalData: { realFinalist1:'', realFinalist2:'', realChampion:'' }, scoreChart: null, accuracyChart: null, championChart: null, bonusChart: null };
+// ═══════════════════════════════ STATE ═══════════════════════════════
+const state = {
+  players: [],
+  matches: [],
+  results: {},        // key: match number, value: {sA, sB}
+  autoLocked: new Set(), // tập các matchId đã được khóa bởi API
+  finalData: { realFinalist1:'', realFinalist2:'', realChampion:'' },
+  scoreChart: null,
+  accuracyChart: null,
+  championChart: null,
+  bonusChart: null,
+};
 let currentRoundFilter = 'all';
+let pollingInterval = null;
 
-// Helper
-function norm(s){ return (s||'').trim().toLowerCase().replace(/\s+/g,' '); }
-function getRound(tt) { if (tt <= 72) return 'Vòng bảng'; if (tt <= 80) return '1/16'; if (tt <= 88) return '1/8'; if (tt <= 92) return '1/4'; if (tt <= 94) return 'Bán kết'; return 'Chung kết'; }
-
-// Lưu toàn bộ state vào localStorage
-function persistState() {
-  const toStore = {
-    players: state.players,
-    results: state.results,
-    finalData: state.finalData,
-    matchesVersion: state.matches.length // chỉ để tham khảo
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
-}
-// Tải từ localStorage
-function loadPersistedState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return false;
-  try {
-    const data = JSON.parse(raw);
-    if (data.players) state.players = data.players;
-    if (data.results) state.results = data.results;
-    if (data.finalData) state.finalData = data.finalData;
-    rebuildMatchesFromPlayers();
-    return true;
-  } catch(e) { return false; }
-}
-function rebuildMatchesFromPlayers() {
-  if (state.players.length > 0 && state.players[0].predictions) {
-    state.matches = state.players[0].predictions.map(p => ({ tt:p.tt, teamA:p.teamA, teamB:p.teamB, round:getRound(p.tt) }));
-  } else state.matches = [];
+// ═══════════════════════════════ ROUND MAP ═══════════════════════════════
+function getRound(tt) {
+  if (tt <= 72) return 'Vòng bảng';
+  if (tt <= 80) return '1/16';
+  if (tt <= 88) return '1/8';
+  if (tt <= 92) return '1/4';
+  if (tt <= 94) return 'Bán kết';
+  return 'Chung kết';
 }
 
-// Scoring logic (giữ nguyên)
+// ═══════════════════════════════ SCORING (giữ nguyên) ═══════════════════════════════
 function calcMatchPoints(pred, actual, round) {
   if (!actual || actual.sA === null || actual.sB === null) return null;
   if (pred.sA === null || pred.sB === null) return 0;
@@ -359,7 +261,14 @@ function calcMatchPoints(pred, actual, round) {
   const exact = (pA===rA && pB===rB);
   const isDraw = rA===rB, predDraw = pA===pB;
   const correctWinner = (pA>pB&&rA>rB)||(pA<pB&&rA<rB)||(pA===pB&&rA===rB);
-  const tbl = { 'Vòng bảng':{exact:0,wrongDraw:-1,wrong:-2,winner:-1,exactDraw:0}, '1/16':{exact:1,wrongDraw:-2,wrong:-4,winner:-2,exactDraw:1}, '1/8':{exact:1,wrongDraw:-2,wrong:-4,winner:-2,exactDraw:1}, '1/4':{exact:1,wrongDraw:-2,wrong:-4,winner:-2,exactDraw:1}, 'Bán kết':{exact:1,wrongDraw:-2,wrong:-4,winner:-2,exactDraw:1}, 'Chung kết':{exact:2,wrongDraw:-4,wrong:-8,winner:-4,exactDraw:2} };
+  const tbl = {
+    'Vòng bảng': {exact:0, winner:-1, exactDraw:0, wrongDraw:-1, wrong:-2},
+    '1/16':      {exact:1, winner:-2, exactDraw:1, wrongDraw:-2, wrong:-4},
+    '1/8':       {exact:1, winner:-2, exactDraw:1, wrongDraw:-2, wrong:-4},
+    '1/4':       {exact:1, winner:-2, exactDraw:1, wrongDraw:-2, wrong:-4},
+    'Bán kết':   {exact:1, winner:-2, exactDraw:1, wrongDraw:-2, wrong:-4},
+    'Chung kết': {exact:2, winner:-4, exactDraw:2, wrongDraw:-4, wrong:-8},
+  };
   const p = tbl[round] || tbl['Vòng bảng'];
   if (exact) return isDraw ? p.exactDraw : p.exact;
   if (isDraw && predDraw) return p.exactDraw;
@@ -367,6 +276,7 @@ function calcMatchPoints(pred, actual, round) {
   if (correctWinner) return p.winner;
   return p.wrong;
 }
+
 function calcBonusPoints(player, fd) {
   let bonus = 0;
   const rf1 = norm(fd.realFinalist1), rf2 = norm(fd.realFinalist2), rc = norm(fd.realChampion);
@@ -385,10 +295,232 @@ function calcBonusPoints(player, fd) {
     else if (realFinSet.length && realFinSet.includes(pc)) bonus -= 3;
     else bonus -= 5;
   }
-  return { bonus, details:[] };
+  return {bonus, details: []};
+}
+function norm(s) { return (s||'').trim().toLowerCase().replace(/\s+/g,' '); }
+
+// ═══════════════════════════════ API TỰ ĐỘNG ═══════════════════════════════
+// Mô phỏng API trả về kết quả các trận đã kết thúc.
+// Trong thực tế, thay URL bằng endpoint thật. Cấu trúc dữ liệu mong đợi:
+// [{ matchId: 1, homeScore: 2, awayScore: 1, finished: true }, ...]
+async function fetchMatchResultsFromAPI() {
+  // Mô phỏng gọi API – có thể thay bằng fetch thực tế
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Tạo dữ liệu mẫu: 10 trận đầu tiên đã kết thúc với tỷ số ngẫu nhiên (để minh họa)
+      const sampleResults = [];
+      for (let i = 1; i <= 72; i++) {
+        // Giả sử 10 trận đầu đã kết thúc, các trận sau chưa
+        if (i <= 12) {
+          sampleResults.push({
+            matchId: i,
+            homeScore: Math.floor(Math.random() * 4),
+            awayScore: Math.floor(Math.random() * 4),
+            finished: true
+          });
+        } else {
+          sampleResults.push({ matchId: i, finished: false });
+        }
+      }
+      resolve(sampleResults);
+    }, 800);
+  });
 }
 
-// Tính toán bảng xếp hạng
+async function syncResultsFromAPI() {
+  try {
+    const apiResults = await fetchMatchResultsFromAPI();
+    let updatedCount = 0;
+    for (const item of apiResults) {
+      if (item.finished && item.homeScore !== undefined && item.awayScore !== undefined) {
+        const matchId = item.matchId;
+        // Ghi đè kết quả cũ (kể cả manual) và khóa input
+        state.results[matchId] = { sA: item.homeScore, sB: item.awayScore };
+        if (!state.autoLocked.has(matchId)) {
+          state.autoLocked.add(matchId);
+          updatedCount++;
+        }
+      } else {
+        // Nếu API báo chưa finished, không xóa kết quả cũ nhưng cũng không khóa
+        // (giữ nguyên trạng thái hiện tại)
+      }
+    }
+    if (updatedCount > 0) {
+      showToast(`📡 Đã cập nhật ${updatedCount} trận từ API`, 'success');
+      renderMatchesTable();     // làm mới bảng, các ô input sẽ bị disabled
+      calculateAndRefreshAll(); // tính lại điểm
+    } else {
+      // Vẫn refresh để cập nhật trạng thái disabled nếu cần
+      renderMatchesTable();
+    }
+  } catch (error) {
+    console.error('Lỗi khi gọi API:', error);
+    showToast('Không thể lấy kết quả từ API', 'error');
+  }
+}
+
+function manualSyncFromAPI() {
+  showToast('Đang đồng bộ từ API...', 'success');
+  syncResultsFromAPI();
+}
+
+function startPolling(intervalMs = 300000) { // 5 phút
+  if (pollingInterval) clearInterval(pollingInterval);
+  pollingInterval = setInterval(() => {
+    syncResultsFromAPI();
+  }, intervalMs);
+}
+
+// ═══════════════════════════════ FILE READING (giữ nguyên) ═══════════════════════════════
+function readExcelFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target.result, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null});
+        const name = String(rows[0]?.[0] || file.name.replace(/\.xlsx?$/i,'')).trim();
+        const predictions = [];
+        for (let i=3; i<rows.length; i++) {
+          const r = rows[i];
+          if (!r) continue;
+          const tt = r[0];
+          if (typeof tt === 'number' && tt > 0) {
+            predictions.push({tt, teamA: r[1]?String(r[1]).trim():'', sA: (r[2]!==null && r[2]!==undefined && r[2]!=='')?parseInt(r[2]):null, sB: (r[3]!==null && r[3]!==undefined && r[3]!=='')?parseInt(r[3]):null, teamB: r[4]?String(r[4]).trim():''});
+          }
+        }
+        let finalist1=null, finalist2=null, champion=null;
+        const rowFinal = rows[76];
+        if (rowFinal) { if(rowFinal[1]) finalist1=String(rowFinal[1]).trim(); if(rowFinal[4]) finalist2=String(rowFinal[4]).trim(); }
+        const rowChamp = rows[78];
+        if(rowChamp && rowChamp[1]) champion=String(rowChamp[1]).trim();
+        resolve({name, predictions, finalist1, finalist2, champion});
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+document.getElementById('fileInput').addEventListener('change', async (e) => { await loadFiles(Array.from(e.target.files)); e.target.value = ''; });
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', async e => { e.preventDefault(); dropZone.classList.remove('drag-over'); await loadFiles(Array.from(e.dataTransfer.files).filter(f => f.name.match(/\.xlsx?$/i))); });
+
+async function loadFiles(files) {
+  let added=0, dupes=0;
+  for (const file of files) {
+    try {
+      const player = await readExcelFile(file);
+      if (state.players.find(p => p.name === player.name)) { dupes++; continue; }
+      state.players.push(player);
+      if (state.matches.length === 0) {
+        state.matches = player.predictions.map(p => ({tt:p.tt, teamA:p.teamA, teamB:p.teamB, round:getRound(p.tt)}));
+        renderMatchesTable();
+      }
+      added++;
+    } catch(err) { showToast('Lỗi đọc file: '+file.name, 'error'); }
+  }
+  renderPlayersList();
+  document.getElementById('playerCount').textContent = state.players.length;
+  if (added > 0) showToast('✅ Đã thêm '+added+' người chơi!');
+  if (dupes > 0) showToast('⚠️ '+dupes+' file đã tồn tại', 'error');
+  calculateAndRefreshAll();
+}
+
+function renderPlayersList() {
+  const c = document.getElementById('playersList');
+  if (!state.players.length) { c.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:28px;color:var(--text3);font-size:13px;">Chưa có người chơi. Upload file Excel để bắt đầu!</div>'; return; }
+  c.innerHTML = state.players.map((p,i) => {
+    const init = p.name.split(' ').slice(-2).map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    return `<div class="player-chip"><div class="avatar">${init}</div><div><div class="name">${p.name}</div><div class="matches">${p.predictions.length} trận · CK: ${p.finalist1||'?'} & ${p.finalist2||'?'}</div><div class="matches">VĐ: ${p.champion||'?'}</div></div><button class="remove-btn" onclick="removePlayer(${i})">✕</button></div>`;
+  }).join('');
+}
+
+function removePlayer(i) {
+  state.players.splice(i,1);
+  renderPlayersList();
+  document.getElementById('playerCount').textContent = state.players.length;
+  calculateAndRefreshAll();
+  showToast('🗑️ Đã xóa người chơi');
+}
+
+// ═══════════════════════════════ RENDER BẢNG TRẬN (có hỗ trợ disabled nếu autoLocked) ═══════════════════════════════
+function renderMatchesTable() {
+  const tbody = document.getElementById('matchesTbody');
+  const noMsg = document.getElementById('noMatchesMsg');
+  if (!state.matches.length) { tbody.innerHTML=''; noMsg.style.display='block'; return; }
+  noMsg.style.display='none';
+  const filtered = currentRoundFilter==='all' ? state.matches : state.matches.filter(m=>m.round===currentRoundFilter);
+  tbody.innerHTML = filtered.map(m => {
+    const res = state.results[m.tt]||{};
+    const has = res.sA!==undefined && res.sA!==null;
+    const isAuto = state.autoLocked.has(m.tt);
+    const disabledAttr = isAuto ? 'disabled' : '';
+    const styleReadonly = isAuto ? 'style="background:#2a4a35;opacity:0.8;"' : '';
+    return `<tr>
+      <td class="match-num">${m.tt}</td>
+      <td class="team-name team-home">${m.teamA}</td>
+      <td colspan="3">
+        <div class="score-inputs">
+          <input type="number" class="score-in" min="0" max="20" id="sA_${m.tt}" value="${has?res.sA:''}" placeholder="—" ${disabledAttr} ${styleReadonly} oninput="tempSave(${m.tt})">
+          <span class="score-sep">:</span>
+          <input type="number" class="score-in" min="0" max="20" id="sB_${m.tt}" value="${has?res.sB:''}" placeholder="—" ${disabledAttr} ${styleReadonly} oninput="tempSave(${m.tt})">
+        </div>
+      </td>
+      <td class="team-name team-away">${m.teamB}</td>
+      <td style="text-align:center"><span class="match-round-tag">${m.round}</span></td>
+      <td style="text-align:center"><span class="status-badge ${has?'status-done':'status-pending'}">${has?'✓ Đã có':'⏳ Chờ'}</span>${isAuto? ' <span style="font-size:9px;">(auto)</span>' : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterRound(round, btn) {
+  currentRoundFilter = round;
+  document.querySelectorAll('.round-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMatchesTable();
+}
+
+function tempSave(tt) {
+  if (state.autoLocked.has(tt)) return; // không cho sửa nếu đã auto
+  const a = document.getElementById('sA_'+tt)?.value;
+  const b = document.getElementById('sB_'+tt)?.value;
+  if (a!=='' && b!=='') state.results[tt] = {sA:parseInt(a), sB:parseInt(b)};
+  else delete state.results[tt];
+  persistToLocal(); // lưu local
+}
+
+function onFinalDataChange() {
+  state.finalData.realFinalist1 = document.getElementById('realFinalist1').value;
+  state.finalData.realFinalist2 = document.getElementById('realFinalist2').value;
+  state.finalData.realChampion  = document.getElementById('realChampion').value;
+  persistToLocal();
+  calculateAndRefreshAll();
+}
+
+function manualSaveAll() {
+  // Lưu tất cả các ô input (chỉ những ô không bị disabled mới có thể thay đổi)
+  state.matches.forEach(m => {
+    if (!state.autoLocked.has(m.tt)) {
+      const a = document.getElementById('sA_'+m.tt)?.value;
+      const b = document.getElementById('sB_'+m.tt)?.value;
+      if (a!=='' && a!=null && b!=='' && b!=null)
+        state.results[m.tt] = {sA:parseInt(a), sB:parseInt(b)};
+    }
+  });
+  onFinalDataChange();
+  persistToLocal();
+  calculateAndRefreshAll();
+  showToast('✅ Đã lưu & tính điểm xong!');
+  switchTab('dashboard', document.querySelector('.nav-btn'));
+}
+
+function resetFormAndReload() { renderMatchesTable(); showToast('🔄 Đã reset hiển thị'); }
+
+// ═══════════════════════════════ TÍNH TOÁN BXH ═══════════════════════════════
 function computeLeaderboard() {
   const fd = state.finalData;
   return state.players.map(player => {
@@ -414,19 +546,15 @@ function computeLeaderboard() {
   }).sort((a,b)=>b.total-a.total);
 }
 
-// ========== RENDER & CHARTS ==========
-let chartScore, chartAcc, champChart, bonusChart;
-function destroyCharts() { if(chartScore) chartScore.destroy(); if(chartAcc) chartAcc.destroy(); if(champChart) champChart.destroy(); if(bonusChart) bonusChart.destroy(); }
-function renderDashboardAndCharts() {
-  const lb = computeLeaderboard();
-  const playedMatches = Object.keys(state.results).length;
+function renderDashboard(lb) {
+  const played = Object.keys(state.results).length;
   document.getElementById('statPlayers').textContent = state.players.length;
-  document.getElementById('statMatches').textContent = playedMatches;
+  document.getElementById('statMatches').textContent = played;
   if (!lb.length) {
     document.getElementById('statBest').textContent = '—'; document.getElementById('statMoney').textContent = '—';
     document.getElementById('lbBody').innerHTML = `<div class="empty-state"><div class="icon">📋</div><h3>Chưa có dữ liệu</h3><p>Upload file Excel và nhập kết quả để xem bảng xếp hạng</p></div>`;
     document.getElementById('announceBanner').classList.remove('show');
-    destroyCharts(); return;
+    return;
   }
   const leader = lb[0];
   document.getElementById('statBest').textContent = (leader.total>=0?'+':'')+leader.total+'đ';
@@ -442,98 +570,94 @@ function renderDashboardAndCharts() {
     const acc=p.played>0?Math.round(p.correct/p.played*100):0;
     return `<div class="lb-row ${rc[rank]||''}"><div><span class="rank-badge ${rk}">${rank<=3?['🥇','🥈','🥉'][i]:rank}</span></div><div class="player-info"><div class="lb-avatar">${init}</div><div><div class="lb-name">${p.name}</div><div class="lb-sub">VĐ: ${p.champion||'?'} · ${acc}% đúng</div></div></div><div class="lb-score ${sc}">${p.total>=0?'+':''}${p.total}</div><div class="lb-cell" style="color:var(--green-light)">${p.correct}</div><div class="lb-cell" style="color:var(--gold)">${p.exactScore}</div><div class="lb-cell" style="color:#f87171">${p.wrong}</div><div class="lb-bonus ${bonusCls?'score-'+bonusCls:''}">${p.bonus!==0?bonusTxt:'—'}</div><div class="lb-cell" style="color:${money>=0?'var(--green-light)':'#f87171'}">${moneyStr}</div></div>`;
   }).join('');
-  // Banner
-  if(playedMatches>0){
-    const banner=document.getElementById('announceBanner'); banner.classList.add('show');
-    document.getElementById('announceTitle').textContent=`🏆 ${leader.name} đang dẫn đầu!`;
-    document.getElementById('announceBody').textContent=`Cập nhật sau ${playedMatches} trận đấu. Bảng xếp hạng mới nhất!`;
-    document.getElementById('announceHighlights').innerHTML = `<div class="highlight-chip">🥇 <strong>${leader.name}</strong> dẫn đầu <strong>${leader.total>=0?'+':''}${leader.total}đ</strong></div>`;
-  } else document.getElementById('announceBanner').classList.remove('show');
-  // Basic charts
-  const ctx1=document.getElementById('chartScores').getContext('2d');
-  if(chartScore) chartScore.destroy();
-  chartScore = new Chart(ctx1, { type:'bar', data:{ labels:lb.slice(0,12).map(p=>p.name.split(' ').slice(-1)[0]), datasets:[{label:'Điểm',data:lb.slice(0,12).map(p=>p.total),backgroundColor:lb.slice(0,12).map((_,i)=>i===0?'#f0b429':i===1?'#9ca3af':i===2?'#cd7f32':'#25a855'),borderRadius:5}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#86efac'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#86efac'}}}} });
-  const ctx2=document.getElementById('chartAccuracy').getContext('2d'); if(chartAcc) chartAcc.destroy();
-  const te=lb.reduce((s,p)=>s+p.exactScore,0), tc=lb.reduce((s,p)=>s+p.correct,0)-te, tw=lb.reduce((s,p)=>s+p.wrong,0);
-  chartAcc = new Chart(ctx2, { type:'doughnut', data:{ labels:['Đúng tỷ số','Đúng đội','Sai'], datasets:[{data:[te,tc,tw],backgroundColor:['#f0b429','#25a855','#dc2626'],borderWidth:0}] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{color:'#86efac',font:{size:12}}}} } });
-  // Extra charts: champion prediction & bonus distribution
-  renderExtraCharts(lb);
+  if (played > 0) { const banner = document.getElementById('announceBanner'); banner.classList.add('show'); document.getElementById('announceTitle').textContent=`🏆 ${leader.name} đang dẫn đầu!`; document.getElementById('announceBody').textContent=`Cập nhật sau ${played} trận đấu (tự động + thủ công).`; document.getElementById('announceHighlights').innerHTML = `<div class="highlight-chip">🥇 <strong>${leader.name}</strong> dẫn đầu <strong>${leader.total>=0?'+':''}${leader.total}đ</strong></div>`; } else document.getElementById('announceBanner').classList.remove('show');
+  updateCharts(lb);
   renderRecentMatches();
 }
-function renderExtraCharts(lb) {
-  // champion prediction count
-  const championCounts = new Map();
-  state.players.forEach(p => { if(p.champion) { let c = norm(p.champion); championCounts.set(c, (championCounts.get(c)||0)+1); } });
+
+function updateCharts(lb) {
+  const ctx1 = document.getElementById('chartScores').getContext('2d');
+  if (state.scoreChart) state.scoreChart.destroy();
+  state.scoreChart = new Chart(ctx1, { type:'bar', data:{ labels:lb.slice(0,12).map(p=>p.name.split(' ').slice(-1)[0]), datasets:[{label:'Điểm',data:lb.slice(0,12).map(p=>p.total),backgroundColor:lb.slice(0,12).map((_,i)=>i===0?'#f0b429':i===1?'#9ca3af':i===2?'#cd7f32':'#25a855'),borderRadius:5}] }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#86efac'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#86efac'}}}} });
+  const ctx2 = document.getElementById('chartAccuracy').getContext('2d'); if(state.accuracyChart) state.accuracyChart.destroy();
+  const te=lb.reduce((s,p)=>s+p.exactScore,0), tc=lb.reduce((s,p)=>s+p.correct,0)-te, tw=lb.reduce((s,p)=>s+p.wrong,0);
+  state.accuracyChart = new Chart(ctx2, { type:'doughnut', data:{ labels:['Đúng tỷ số','Đúng đội','Sai'], datasets:[{data:[te,tc,tw],backgroundColor:['#f0b429','#25a855','#dc2626'],borderWidth:0}] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{color:'#86efac'}}}} });
+  const championCounts = new Map(); state.players.forEach(p=>{ if(p.champion){ let c=norm(p.champion); championCounts.set(c,(championCounts.get(c)||0)+1); } });
   const sorted = Array.from(championCounts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const ctxChamp = document.getElementById('championPredChart').getContext('2d');
-  if(champChart) champChart.destroy();
-  champChart = new Chart(ctxChamp, { type:'bar', data:{ labels:sorted.map(s=>s[0].length>15?s[0].slice(0,12)+'…':s[0]), datasets:[{label:'Số người chọn',data:sorted.map(s=>s[1]),backgroundColor:'#f0b429',borderRadius:6}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#86efac'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'var(--text2)'}}}} });
-  // bonus distribution (positive, zero, negative)
-  const fd=state.finalData; let pos=0,zero=0,neg=0;
-  state.players.forEach(p=>{ let {bonus}=calcBonusPoints(p,fd); if(bonus>0) pos++; else if(bonus===0) zero++; else neg++; });
-  const ctxBonus = document.getElementById('bonusDistChart').getContext('2d');
-  if(bonusChart) bonusChart.destroy();
-  bonusChart = new Chart(ctxBonus, { type:'pie', data:{ labels:[`Thưởng dương (${pos})`,`Không thưởng (${zero})`,`Thưởng âm (${neg})`], datasets:[{data:[pos,zero,neg],backgroundColor:['#25a855','#f0b429','#dc2626'],borderWidth:0}] }, options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{color:'#86efac',font:{size:11}}}} } });
+  const ctxChamp = document.getElementById('championPredChart').getContext('2d'); if(state.championChart) state.championChart.destroy();
+  state.championChart = new Chart(ctxChamp, { type:'bar', data:{ labels:sorted.map(s=>s[0].length>15?s[0].slice(0,12)+'…':s[0]), datasets:[{label:'Số người chọn',data:sorted.map(s=>s[1]),backgroundColor:'#f0b429',borderRadius:6}] }, options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}} } });
+  const fd=state.finalData; let pos=0,zero=0,neg=0; state.players.forEach(p=>{ let {bonus}=calcBonusPoints(p,fd); if(bonus>0) pos++; else if(bonus===0) zero++; else neg++; });
+  const ctxBonus = document.getElementById('bonusDistChart').getContext('2d'); if(state.bonusChart) state.bonusChart.destroy();
+  state.bonusChart = new Chart(ctxBonus, { type:'pie', data:{ labels:[`Thưởng dương (${pos})`,`Không thưởng (${zero})`,`Thưởng âm (${neg})`], datasets:[{data:[pos,zero,neg],backgroundColor:['#25a855','#f0b429','#dc2626'],borderWidth:0}] }, options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{color:'#86efac'}}}} });
 }
-function renderRecentMatches(){
-  const panel=document.getElementById('recentPanel'),listDiv=document.getElementById('recentList');
+
+function renderRecentMatches() {
+  const panel=document.getElementById('recentPanel'), listDiv=document.getElementById('recentList');
   const recent=Object.entries(state.results).slice(-8).reverse();
   if(!recent.length){panel.style.display='none';return;}
   panel.style.display='block';
   listDiv.innerHTML=recent.map(([tt,res])=>{ const m=state.matches.find(m=>m.tt==tt); if(!m) return ''; return `<div class="match-result-row"><div class="match-badge">${tt}</div><div class="match-teams"><strong>${m.teamA}</strong> vs <strong>${m.teamB}</strong></div><div class="match-score-actual">${res.sA}:${res.sB}</div><span class="match-round-tag">${m.round}</span></div>`; }).join('');
 }
-function renderMatchesTable() {
-  const tbody = document.getElementById('matchesTbody'), noMsg = document.getElementById('noMatchesMsg');
-  if (!state.matches.length) { tbody.innerHTML=''; noMsg.style.display='block'; return; }
-  noMsg.style.display='none';
-  const filtered = currentRoundFilter==='all' ? state.matches : state.matches.filter(m=>m.round===currentRoundFilter);
-  tbody.innerHTML = filtered.map(m => {
-    const res = state.results[m.tt]||{};
-    const has = res.sA!==undefined && res.sA!==null;
-    return `<tr><td class="match-num">${m.tt}</td><td class="team-name team-home">${m.teamA}</td><td colspan="3"><div class="score-inputs"><input type="number" class="score-in" min="0" max="20" id="sA_${m.tt}" value="${has?res.sA:''}" placeholder="—" oninput="updateScoreAndAutoSave(${m.tt}, this.value, document.getElementById('sB_${m.tt}').value)"><span class="score-sep">:</span><input type="number" class="score-in" min="0" max="20" id="sB_${m.tt}" value="${has?res.sB:''}" placeholder="—" oninput="updateScoreAndAutoSave(${m.tt}, document.getElementById('sA_${m.tt}').value, this.value)"></div></td><td class="team-name team-away">${m.teamB}</td><td style="text-align:center"><span class="match-round-tag">${m.round}</span></td><td style="text-align:center"><span class="status-badge ${has?'status-done':'status-pending'}">${has?'✓ Đã có':'⏳ Chờ'}</span></td></tr>`;
-  }).join('');
+
+function calculateAndRefreshAll() {
+  const lb = computeLeaderboard();
+  renderDashboard(lb);
+  renderMatchesTable();
+  renderPlayersList();
 }
-function updateScoreAndAutoSave(tt, aVal, bVal) { if(aVal!=='' && bVal!=='') state.results[tt] = {sA:parseInt(aVal), sB:parseInt(bVal)}; else delete state.results[tt]; persistState(); calculateAndRefreshAll(); }
-function onFinalDataChange() { state.finalData.realFinalist1 = document.getElementById('realFinalist1').value; state.finalData.realFinalist2 = document.getElementById('realFinalist2').value; state.finalData.realChampion = document.getElementById('realChampion').value; persistState(); calculateAndRefreshAll(); }
-function manualSaveAll() { document.querySelectorAll('.score-in').forEach(inp=>{ let mt = inp.id.split('_'); if(mt[0]==='sA'){ let tt=parseInt(mt[1]), aVal=inp.value, bVal=document.getElementById('sB_'+tt)?.value; if(aVal!=='' && bVal!=='') state.results[tt]={sA:parseInt(aVal),sB:parseInt(bVal)};} }); onFinalDataChange(); showToast('✅ Đã lưu toàn bộ kết quả!'); }
-function resetFormAndReload() { renderMatchesTable(); showToast('🔄 Đã reset hiển thị'); }
-function calculateAndRefreshAll() { renderDashboardAndCharts(); renderMatchesTable(); renderPlayersList(); }
-function renderPlayersList() {
-  const c = document.getElementById('playersList');
-  if (!state.players.length) { c.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:28px;color:var(--text3);font-size:13px;">Chưa có người chơi. Upload file Excel để bắt đầu!</div>'; document.getElementById('playerCount').textContent='0'; return; }
-  c.innerHTML = state.players.map((p,i) => `<div class="player-chip"><div class="avatar">${p.name.split(' ').slice(-2).map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div><div><div class="name">${p.name}</div><div class="matches">${p.predictions.length} trận · CK: ${p.finalist1||'?'} & ${p.finalist2||'?'}</div><div class="matches">VĐ: ${p.champion||'?'}</div></div><button class="remove-btn" onclick="removePlayer(${i})">✕</button></div>`).join('');
-  document.getElementById('playerCount').textContent = state.players.length;
+
+// ═══════════════════════════════ PERSIST LOCAL ═══════════════════════════════
+const STORAGE_KEY = "WorldCup2026_AppData";
+function persistToLocal() {
+  const toStore = {
+    players: state.players,
+    results: state.results,
+    autoLocked: Array.from(state.autoLocked),
+    finalData: state.finalData,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
 }
-function removePlayer(i) { state.players.splice(i,1); if(state.players.length===0) state.matches=[]; else rebuildMatchesFromPlayers(); persistState(); calculateAndRefreshAll(); showToast('🗑️ Đã xóa người chơi'); }
-async function loadFiles(files) {
-  let added=0;
-  for(const file of files){
-    try{
-      const player = await readExcelFile(file);
-      if(state.players.find(p=>p.name===player.name)) continue;
-      state.players.push(player);
-      added++;
-      if(state.matches.length===0){ state.matches = player.predictions.map(p=>({tt:p.tt, teamA:p.teamA, teamB:p.teamB, round:getRound(p.tt)})); }
-    }catch(e){ showToast('Lỗi file: '+file.name,'error'); }
-  }
-  if(added) { persistState(); calculateAndRefreshAll(); showToast(`✅ Thêm ${added} người chơi`); }
+function loadPersistedState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return false;
+  try {
+    const data = JSON.parse(raw);
+    if (data.players) state.players = data.players;
+    if (data.results) state.results = data.results;
+    if (data.autoLocked) state.autoLocked = new Set(data.autoLocked);
+    if (data.finalData) state.finalData = data.finalData;
+    if (state.players.length && (!state.matches.length)) {
+      state.matches = state.players[0].predictions.map(p => ({tt:p.tt, teamA:p.teamA, teamB:p.teamB, round:getRound(p.tt)}));
+    }
+    return true;
+  } catch(e) { return false; }
 }
-function readExcelFile(file) { return new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onload=e=>{ try{ const wb=XLSX.read(e.target.result,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]]; const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null}); const name=String(rows[0]?.[0]||file.name.replace(/\.xlsx?$/i,'')).trim(); const predictions=[]; for(let i=3;i<rows.length;i++){ const r=rows[i]; if(!r) continue; const tt=r[0]; if(typeof tt==='number' && tt>0){ predictions.push({tt, teamA:r[1]?String(r[1]).trim():'', sA:(r[2]!==null&&r[2]!==undefined&&r[2]!=='')?parseInt(r[2]):null, sB:(r[3]!==null&&r[3]!==undefined&&r[3]!=='')?parseInt(r[3]):null, teamB:r[4]?String(r[4]).trim():''}); } } let finalist1=null,finalist2=null,champion=null; const rowFinal=rows[76]; if(rowFinal){ if(rowFinal[1]) finalist1=String(rowFinal[1]).trim(); if(rowFinal[4]) finalist2=String(rowFinal[4]).trim(); } const rowChamp=rows[78]; if(rowChamp && rowChamp[1]) champion=String(rowChamp[1]).trim(); resolve({name,predictions,finalist1,finalist2,champion}); } catch(err){ reject(err); } }; reader.onerror=reject; reader.readAsArrayBuffer(file); }); }
-document.getElementById('fileInput').addEventListener('change', e => loadFiles(Array.from(e.target.files)));
-const dropZoneDiv = document.getElementById('dropZone'); dropZoneDiv.addEventListener('dragover', e=>{ e.preventDefault(); dropZoneDiv.classList.add('drag-over'); }); dropZoneDiv.addEventListener('dragleave',()=>dropZoneDiv.classList.remove('drag-over')); dropZoneDiv.addEventListener('drop', async e=>{ e.preventDefault(); dropZoneDiv.classList.remove('drag-over'); loadFiles(Array.from(e.dataTransfer.files).filter(f=>f.name.match(/\.xlsx?$/i))); });
-function filterRound(round, btn) { currentRoundFilter=round; document.querySelectorAll('.round-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderMatchesTable(); }
-function switchTab(tab, btn) { document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('tab-'+tab).classList.add('active'); if(btn) btn.classList.add('active'); }
-let toastTimer; function showToast(msg,type='success'){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; document.getElementById('toastIcon').textContent=type==='error'?'⚠️':'✅'; t.className='toast '+(type==='error'?'error ':'')+' show'; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3000); }
-// Khởi tạo: load dữ liệu từ localStorage + đồng bộ giao diện
-window.onload = () => {
+
+// ═══════════════════════════════ UI HELPERS ═══════════════════════════════
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+let toastT;
+function showToast(msg, type='success'){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; document.getElementById('toastIcon').textContent=type==='error'?'⚠️':'✅'; t.className='toast '+(type==='error'?'error ':'')+' show'; clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3500); }
+
+// ═══════════════════════════════ INIT ═══════════════════════════════
+window.onload = async () => {
   loadPersistedState();
-  if(state.players.length>0 && !state.matches.length) rebuildMatchesFromPlayers();
-  if(state.finalData.realFinalist1) document.getElementById('realFinalist1').value = state.finalData.realFinalist1;
-  if(state.finalData.realFinalist2) document.getElementById('realFinalist2').value = state.finalData.realFinalist2;
-  if(state.finalData.realChampion) document.getElementById('realChampion').value = state.finalData.realChampion;
+  if (state.players.length && !state.matches.length && state.players[0].predictions) {
+    state.matches = state.players[0].predictions.map(p => ({tt:p.tt, teamA:p.teamA, teamB:p.teamB, round:getRound(p.tt)}));
+  }
+  if (state.finalData.realFinalist1) document.getElementById('realFinalist1').value = state.finalData.realFinalist1;
+  if (state.finalData.realFinalist2) document.getElementById('realFinalist2').value = state.finalData.realFinalist2;
+  if (state.finalData.realChampion) document.getElementById('realChampion').value = state.finalData.realChampion;
   renderPlayersList();
   renderMatchesTable();
   calculateAndRefreshAll();
+  // Gọi API lần đầu và bắt đầu polling
+  await syncResultsFromAPI();
+  startPolling(300000); // 5 phút
 };
 </script>
 </body>
