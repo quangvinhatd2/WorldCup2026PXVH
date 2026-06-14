@@ -686,8 +686,9 @@ function calculate() {
   MATCHES.forEach(m => {
     const current = state.results[m.tt];
     if (!current) return;
-    const prev = lastResults[m.tt];
-    if (!prev || prev.sA !== current.sA || prev.sB !== current.sB) {
+    
+    const prev = (lastResults && lastResults[m.tt]) ? lastResults[m.tt] : null;
+    if (prev && (prev.sA !== current.sA || prev.sB !== current.sB)) {
       notifyAfterMatch(m.tt);
     }
   });
