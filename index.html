@@ -406,7 +406,7 @@ const state = {
   lb: [],
   barChart: null,
   pieChart: null,
-  lastCheer: null, // Lưu câu reo hò gần nhất để hiển thị ở Banner
+  lastCheer: null,
 };
 
 // ══════════════════════════════════════════
@@ -762,7 +762,7 @@ function renderDashboard() {
   const sec = lb[1];
   document.getElementById('banIcon').textContent = '🎉';
   document.getElementById('banTitle').textContent = `🏆 ${leader.name} đang dẫn đầu!`;
-  document.getElementById('banBody').textContent = state.lastCheer || `Cập nhật sau ${played} trận đấu vòng bảng. Bảng xếp hạng mới nhất!`;
+  document.getElementById('banBody').textContent = `Cập nhật sau ${played} trận đấu vòng bảng. Bảng xếp hạng mới nhất!`;
   const chips = [
     `🥇 <strong>${leader.name}</strong> dẫn đầu <strong>${leader.total>=0?'+':''}${leader.total}đ</strong> (${leader.total*3>=0?'+':''}${leader.total*3}k)`,
     sec ? `🥈 <strong>${sec.name}</strong> bám sát với <strong>${sec.total>=0?'+':''}${sec.total}đ</strong>` : null,
