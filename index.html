@@ -470,11 +470,17 @@ function calcPts(pred, actual) {
   const pA = pred.sA, pB = pred.sB;
   const rA = actual.sA, rB = actual.sB;
 
-  if (pA === rA && pB === rB) return 1;
+  // Đúng tỷ số
+  if (pA === rA && pB === rB) return 0;
+
   const predResult = pA > pB ? 'win' : pA < pB ? 'lose' : 'draw';
   const realResult = rA > rB ? 'win' : rA < rB ? 'lose' : 'draw';
-  if (predResult === realResult) return -2;
-  return -4;
+
+  // Đúng kết quả
+  if (predResult === realResult) return -1;
+
+  // Sai hoàn toàn
+  return -2;
 }
 
 function calcBonus(player) {
@@ -502,34 +508,115 @@ function calcBonus(player) {
   }
   return {pts, details};
 }
+  function notifyAfterMatch(matchIndex) {
+  let winners = [];
+  let losers = [];
+
+  Object.entries(PLAYERS_DATA).forEach(([name, player]) => {
+    const pred = player.predictions[matchIndex];
+    const actual = state.results[matchIndex];
+    const pts = calcPts(pred, actual);
+
+    if (pts === 0) winners.push(name);
+    if (pts === -2) losers.push(name);
+  });
+
+  const winMsgs = [
+    "🎉 {name} đoán chuẩn như VAR!",
+    "🔥 {name} quá đỉnh, đúng tỷ số luôn!",
+    "👏 {name} hôm nay bắt kèo cực chuẩn!",
+    "🏆 {name} chính là thánh dự đoán!",
+    "⚡ {name} đọc trận như sách giáo khoa!"
+  ];
+
+  const loseMsgs = [
+    "😅 {name} hôm nay hơi đen rồi!",
+    "🥲 {name} cần xem lại phong độ!",
+    "📉 {name} đang xuống form nhẹ!",
+    "🤯 {name} đoán kiểu này khó top rồi!",
+    "💀 {name} hôm nay dự đoán hơi… tâm linh!"
+  ];
+
+  function random(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  if (winners.length > 0) {
+    const name = random(winners);
+    const msg = random(winMsgs).replace("{name}", name);
+    showToast(msg, 'ok');
+  } else if (losers.length > 0) {
+    const name = random(losers);
+    const msg = random(loseMsgs).replace("{name}", name);
+    showToast(msg, 'err');
+  }
+}
 
 function calculate() {
   state.lb = Object.entries(PLAYERS_DATA).map(([name, player]) => {
-    let total=0, correct=0, exactScore=0, wrong=0, played=0;
+    let total = 0, correct = 0, exactScore = 0, wrong = 0, played = 0;
     const perMatch = {};
 
     MATCHES.forEach(m => {
       const actual = state.results[m.tt];
       if (!actual) return;
+
       played++;
+
       const pred = player.predictions[m.tt];
       const pts = calcPts(pred, actual);
       if (pts === null) return;
+
       total += pts;
       perMatch[m.tt] = pts;
-      const pA=pred?.sA, pB=pred?.sB, rA=actual.sA, rB=actual.sB;
-      if (pA===rA && pB===rB) { exactScore++; correct++; }
-      else if ((pA>pB&&rA>rB)||(pA<pB&&rA<rB)||(pA===pB&&rA===rB)) correct++;
-      else wrong++;
+
+      const pA = pred?.sA, pB = pred?.sB;
+      const rA = actual.sA, rB = actual.sB;
+
+      if (pA === rA && pB === rB) {
+        exactScore++;
+        correct++;
+      } 
+      else if (
+        (pA > pB && rA > rB) ||
+        (pA < pB && rA < rB) ||
+        (pA === pB && rA === rB)
+      ) {
+        correct++;
+      } 
+      else {
+        wrong++;
+      }
     });
 
-    const {pts: bonus} = calcBonus(player);
+    const { pts: bonus } = calcBonus(player);
     total += bonus;
 
-    return {name, total, correct, exactScore, wrong, played, bonus,
-      perMatch, finalist1: player.finalist1, finalist2: player.finalist2, champion: player.champion};
+    return {
+      name,
+      total,
+      correct,
+      exactScore,
+      wrong,
+      played,
+      bonus,
+      perMatch,
+      finalist1: player.finalist1,
+      finalist2: player.finalist2,
+      champion: player.champion
+    };
   });
-  state.lb.sort((a,b) => b.total - a.total);
+
+  // Sắp xếp BXH
+  state.lb.sort((a, b) => b.total - a.total);
+
+  // 🔥 GỌI THÔNG BÁO (CHỈ 1 LẦN / TRẬN)
+  MATCHES.forEach(m => {
+    const actual = state.results[m.tt];
+    if (actual) notifyAfterMatch(m.tt);
+  });
+
+  // Render UI
   renderDashboard();
   renderPlayerCards();
 }
