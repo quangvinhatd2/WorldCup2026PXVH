@@ -702,62 +702,57 @@ function calculate() {
   });
 
   // Sắp xếp BXH
-state.lb.sort((a, b) => b.total - a.total);
+  state.lb.sort((a, b) => b.total - a.total);
 
-// 📈 detect leo hạng
-state.lb.forEach((p, index) => {
-  const oldIndex = lastRanking.findIndex(x => x.name === p.name);
+  // 📈 detect leo hạng
+  state.lb.forEach((p, index) => {
+    const oldIndex = lastRanking.findIndex(x => x.name === p.name);
 
-  if (oldIndex === -1) {
-    p.rankUp = 0;
+    if (oldIndex === -1) {
+      p.rankUp = 0;
+    }
+    else if (oldIndex > index) {
+      p.rankUp = oldIndex - index;
+    } else {
+      p.rankUp = 0;
+    }
+
+    p.rank = index + 1;
+  });
+
+  // 🏆 detect đổi top
+  const currentTop = state.lb[0]?.name;
+
+  if (lastTopPlayer && lastTopPlayer !== currentTop) {
+    showTopChange(currentTop);
   }
-  else if (oldIndex > index) {
-    p.rankUp = oldIndex - index;
-  } else {
-    p.rankUp = 0;
-  }
 
-  p.rank = index + 1; // 🔥 thêm dòng này nếu cần
-});
+  lastTopPlayer = currentTop;
 
-// 🏆 detect đổi top
-const currentTop = state.lb[0]?.name;
-
-if (lastTopPlayer && lastTopPlayer !== currentTop) {
-  showTopChange(currentTop);
-}
-
-lastTopPlayer = currentTop;
-
-// lưu BXH
-lastRanking = state.lb.map(p => ({ name: p.name }));
+  // lưu BXH
+  lastRanking = state.lb.map(p => ({ name: p.name }));
 
   // 🔥 GỌI THÔNG BÁO (CHỈ 1 LẦN / TRẬN)
-  // 🔥 notify chuẩn (không spam)
-MATCHES.forEach(m => {
-  const current = state.results[m.tt];
-  if (!current) return;
+  MATCHES.forEach(m => {
+    const current = state.results[m.tt];
+    if (!current) return;
 
-  const prev = lastResults[m.tt];
+    const prev = lastResults[m.tt];
 
-  if (!prev || prev.sA !== current.sA || prev.sB !== current.sB) {
-    notifyAfterMatch(m.tt);
-  }
-});
+    if (!prev || prev.sA !== current.sA || prev.sB !== current.sB) {
+      notifyAfterMatch(m.tt);
+    }
+  });
 
-// lưu snapshot
-lastResults = JSON.parse(JSON.stringify(state.results));
+  // lưu snapshot
+  lastResults = JSON.parse(JSON.stringify(state.results));
 
-// Render UI
-renderDashboard();
+  // Render UI
+  renderDashboard();
+  renderChartsAdvanced();  // ← Gọi trực tiếp, không cần setTimeout lồng nhau
+  renderPlayerCards();
 
-setTimeout(() => {
-  setTimeout(() => renderChartsAdvanced(), 0); // 🔥 đảm bảo DOM đã có canvas
-}, 0);
-
-renderPlayerCards();
-
-} // 🔥🔥🔥 THIẾU DẤU NÀY → THÊM VÀO ĐÂY
+} // ← ĐÓNG HÀM calculate TẠI ĐÂY
 
 // ===== OUTSIDE calculate =====
 function showTopChange(name) {
