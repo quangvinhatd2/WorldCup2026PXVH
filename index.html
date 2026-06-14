@@ -175,6 +175,40 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   .lb-hdr span:nth-child(n+6),.lb-row>*:nth-child(n+6){display:none;}
   .binputs{grid-template-columns:1fr;}
 }
+  .rank-up {
+  animation: glowUp 1s ease;
+  border: 2px solid #00ffcc;
+}
+
+@keyframes glowUp {
+  0% { transform: scale(1); background: #0f0; }
+  50% { transform: scale(1.05); background: #1aff1a; }
+  100% { transform: scale(1); }
+}
+
+.top-change {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: gold;
+  color: #000;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  animation: dropTop 0.5s ease, fadeOut 3s forwards;
+  z-index: 9999;
+}
+
+@keyframes dropTop {
+  from { transform: translate(-50%, -50px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  0%, 80% { opacity: 1; }
+  100% { opacity: 0; }
+}
 </style>
 </head>
 <body>
@@ -976,9 +1010,11 @@ function closeModal(e) {
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
+
+  const el = document.getElementById('tab-' + tab); // 🔥 QUAN TRỌNG
+  if (el) el.classList.add('active');
+
   if(btn) btn.classList.add('active');
-  else document.querySelector('.nbtn').classList.add('active');
 }
 
 let toastT;
