@@ -216,7 +216,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div class="scard"><div class="ico">👥</div><div class="val" id="sPl">28</div><div class="lbl">Người tham gia</div></div>
     <div class="scard"><div class="ico">⚽</div><div class="val" id="sMt">0</div><div class="lbl">Trận đã cập nhật</div></div>
     <div class="scard"><div class="ico">🏅</div><div class="val" id="sBest">—</div><div class="lbl">Điểm cao nhất</div></div>
-    <div class="scard"><div class="ico">💰</div><div class="val" id="sMoney">—</div><div class="lbl">Tiền dẫn đầu</div></div>
+    <div class="scard"><div class="ico">💰</div><div class="val" id="sMoney">—</div><div class="lbl">Phần thưởng</div></div>
   </div>
 
   <div class="sec-title">🥇 Bảng Xếp Hạng</div>
@@ -224,7 +224,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div class="lb-hdr">
       <span>#</span><span>Người chơi</span>
       <span>Điểm</span><span>Đúng đội</span><span>Đúng tỷ số</span><span>Sai</span>
-      <span>Thưởng CK</span><span>Tiền (k)</span>
+      <span>Thưởng CK</span><span>Quà (k)</span>
     </div>
     <div id="lbBody"><div class="empty"><div class="eico">📋</div><h3>Chưa có kết quả</h3><p>Vào tab "Nhập Kết Quả" để bắt đầu tính điểm</p></div></div>
   </div>
@@ -446,7 +446,8 @@ async function fetchLiveResults(manual) {
     isSyncing = false;
   }
 }
-
+let lastRanking = [];
+let lastTopPlayer = null;
 // Tự động đồng bộ ngay khi mở trang, và lặp lại mỗi 5 phút (miễn phí, không cần API key)
 function startAutoSync() {
   fetchLiveResults(false);
@@ -517,39 +518,70 @@ function calcBonus(player) {
     const actual = state.results[matchIndex];
     const pts = calcPts(pred, actual);
 
-    if (pts === 0) winners.push(name);
-    if (pts === -2) losers.push(name);
+    if (pts === 0) winners.push(name);     // đúng tỷ số
+    else if (pts === -2) losers.push(name); // sai hoàn toàn
   });
 
-  const winMsgs = [
-    "🎉 {name} đoán chuẩn như VAR!",
-    "🔥 {name} quá đỉnh, đúng tỷ số luôn!",
-    "👏 {name} hôm nay bắt kèo cực chuẩn!",
-    "🏆 {name} chính là thánh dự đoán!",
-    "⚡ {name} đọc trận như sách giáo khoa!"
-  ];
-
-  const loseMsgs = [
-    "😅 {name} hôm nay hơi đen rồi!",
-    "🥲 {name} cần xem lại phong độ!",
-    "📉 {name} đang xuống form nhẹ!",
-    "🤯 {name} đoán kiểu này khó top rồi!",
-    "💀 {name} hôm nay dự đoán hơi… tâm linh!"
-  ];
+  // 🎲 random helper
+  function shuffle(arr) {
+    return arr.sort(() => 0.5 - Math.random());
+  }
 
   function random(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  // 🎉 message templates
+  const winMsgs = [
+    "🎉 {names} đoán chuẩn như VAR!",
+    "🔥 {names} bắt kèo quá đỉnh!",
+    "🏆 {names} đọc trận như sách giáo khoa!",
+    "👏 {names} dự đoán chuẩn không cần chỉnh!",
+    "⚡ {names} quá bén trận này!"
+  ];
+
+  const loseMsgs = [
+    "😅 {names} hôm nay hơi đen rồi!",
+    "🥲 {names} cần xem lại phong độ!",
+    "📉 {names} đang xuống form nhẹ!",
+    "🤯 {names} đoán kiểu này hơi mạo hiểm!",
+    "💀 {names} hôm nay dự đoán hơi tâm linh!"
+  ];
+
+  // 🎯 XỬ LÝ WINNERS
   if (winners.length > 0) {
-    const name = random(winners);
-    const msg = random(winMsgs).replace("{name}", name);
+    const shuffled = shuffle([...winners]);
+    const top = shuffled.slice(0, 3);
+
+    let namesText = top.join(", ");
+
+    if (winners.length > 3) {
+      namesText += ` + ${winners.length - 3} người khác`;
+    }
+
+    const msg = random(winMsgs).replace("{names}", namesText);
     showToast(msg, 'ok');
-  } else if (losers.length > 0) {
-    const name = random(losers);
-    const msg = random(loseMsgs).replace("{name}", name);
-    showToast(msg, 'err');
+    return;
   }
+
+  // 💀 XỬ LÝ LOSERS (khi không ai đúng)
+  if (losers.length > 0) {
+    const shuffled = shuffle([...losers]);
+    const top = shuffled.slice(0, 3);
+
+    let namesText = top.join(", ");
+
+    if (losers.length > 3) {
+      namesText += ` + ${losers.length - 3} người khác`;
+    }
+
+    const msg = random(loseMsgs).replace("{names}", namesText);
+    showToast(msg, 'err');
+    return;
+  }
+
+  // 🤝 fallback (ai cũng đoán gần đúng)
+  showToast("🤝 Trận này ai cũng đoán khá sát 😆", 'ok');
 }
 
 function calculate() {
@@ -608,19 +640,66 @@ function calculate() {
   });
 
   // Sắp xếp BXH
-  state.lb.sort((a, b) => b.total - a.total);
+state.lb.sort((a, b) => b.total - a.total);
 
-  // 🔥 GỌI THÔNG BÁO (CHỈ 1 LẦN / TRẬN)
-  MATCHES.forEach(m => {
-    const actual = state.results[m.tt];
-    if (actual) notifyAfterMatch(m.tt);
-  });
+// 📈 detect leo hạng
+state.lb.forEach((p, index) => {
+  const oldIndex = lastRanking.findIndex(x => x.name === p.name);
 
-  // Render UI
-  renderDashboard();
-  renderPlayerCards();
+  if (oldIndex === -1) {
+    p.rankUp = 0;
+  }
+  else if (oldIndex > index) {
+    p.rankUp = oldIndex - index;
+  } else {
+    p.rankUp = 0;
+  }
+
+  p.rank = index + 1; // 🔥 thêm dòng này nếu cần
+});
+
+// 🏆 detect đổi top
+const currentTop = state.lb[0]?.name;
+
+if (lastTopPlayer && lastTopPlayer !== currentTop) {
+  showTopChange(currentTop);
 }
 
+lastTopPlayer = currentTop;
+
+// lưu BXH
+lastRanking = state.lb.map(p => ({ name: p.name }));
+
+  // 🔥 GỌI THÔNG BÁO (CHỈ 1 LẦN / TRẬN)
+  // 🔥 notify chuẩn (không spam)
+MATCHES.forEach(m => {
+  const current = state.results[m.tt];
+  if (!current) return;
+
+  const prev = lastResults[m.tt];
+
+  if (!prev || prev.sA !== current.sA || prev.sB !== current.sB) {
+    notifyAfterMatch(m.tt);
+  }
+});
+
+// lưu snapshot
+lastResults = JSON.parse(JSON.stringify(state.results));
+
+// Render UI
+renderDashboard();
+renderPlayerCards();
+function showTopChange(name) {
+  const el = document.createElement("div");
+  el.className = "top-change";
+  el.innerHTML = `🏆 ${name} đã vươn lên dẫn đầu!`;
+
+  document.body.appendChild(el);
+
+  setTimeout(() => {
+    el.remove();
+  }, 3000);
+}
 // ══════════════════════════════════════════
 // RENDER DASHBOARD
 // ══════════════════════════════════════════
@@ -910,7 +989,7 @@ function showToast(msg, type='ok') {
 
 // INIT
 renderMatches();
-renderPlayerCards();
+calculate();
 startAutoSync();
 </script>
 </body>
