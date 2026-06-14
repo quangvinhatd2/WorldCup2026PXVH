@@ -373,32 +373,76 @@ async function fetchMatchResultsFromAPI() {
   }
 }
 
+// ==================== TỰ ĐỘNG CẬP NHẬT TỶ SỐ REAL-TIME ====================
+// Sử dụng một API miễn phí phổ biến (Ví dụ: Dự án Openfooty hoặc API World Cup 2026 công khai)
+// Bạn có thể thay thế URL_API bằng cổng API chính thức của FIFA hoặc nguồn cung cấp dữ liệu mong muốn.
+const WC2026_API_URL = "https://api.worldcup2026-live-results.json"; 
+
 async function syncResultsFromAPI() {
+  const syncStatusEl = document.getElementById('syncStatusText');
+  if (syncStatusEl) syncStatusEl.textContent = "🔄 Đang kiểm tra tỷ số mới...";
+
   try {
-    const apiResults = await fetchMatchResultsFromAPI();
+    const response = await fetch(WC2026_API_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error("Mạng hoặc API có sự cố");
+    
+    const apiData = await response.json(); 
+    // Giả định API trả về mảng hoặc object chứa các trận đấu, ví dụ: 
+    // [ { "matchNum": 1, "status": "FINISHED", "scoreA": 2, "scoreB": 1 }, ... ]
+    
     let updatedCount = 0;
-    for (const item of apiResults) {
-      if (item.finished && item.homeScore !== undefined) {
-        const matchId = item.matchId;
-        // Kiểm tra matchId có tồn tại trong masterMatches không
-        if (matchId >= 1 && matchId <= 72) {
-          state.results[matchId] = { sA: item.homeScore, sB: item.awayScore };
-          if (!state.autoLocked.has(matchId)) {
-            state.autoLocked.add(matchId);
+
+    if (Array.isArray(apiData)) {
+      apiData.forEach(match => {
+        const tt = match.matchNum;
+        // Chỉ tự động cập nhật các trận đấu đã kết thúc hoàn toàn
+        if (match.status === "FINISHED" || match.status === "COMPLETED") {
+          const sA = parseInt(match.scoreA);
+          const sB = parseInt(match.scoreB);
+          
+          if (!isNaN(sA) && !isNaN(sB)) {
+            // Cập nhật kết quả vào state của hệ thống
+            state.results[tt] = { sA, sB };
+            // Tự động đánh dấu khoá trận đấu này, không cho sửa tay gây lệch điểm
+            state.autoLocked.add(tt); 
             updatedCount++;
           }
         }
-      }
+      });
     }
+
     if (updatedCount > 0) {
-      showToast(`📡 Đã cập nhật ${updatedCount} trận từ API`, 'success');
+      // Lưu lại vào bộ nhớ trình duyệt
+      persistToLocal();
+      // Tính toán lại toàn bộ điểm và bảng xếp hạng dựa trên kết quả mới
+      calculateAndRenderAll();
+      showToast(`🏆 Tự động cập nhật thêm ${updatedCount} trận đấu mới từ World Cup 2026!`);
+    } else {
+      console.log("Không có trận đấu mới nào kết thúc.");
     }
-    renderMatchesTable();
-    calculateAndRefreshAll();
+
+    if (syncStatusEl) {
+      const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      syncStatusEl.textContent = `⚡ Đồng bộ tự động thành công lúc: ${now}`;
+    }
   } catch (error) {
-    console.error('Lỗi khi đồng bộ API:', error);
-    showToast('Không thể kết nối API, vui lòng thử lại sau', 'error');
+    console.error("Lỗi đồng bộ tỷ số tự động:", error);
+    if (syncStatusEl) syncStatusEl.textContent = "⚠️ Lỗi kết nối API tự động.";
   }
+}
+
+// Thiết lập vòng lặp chạy ngầm (Polling)
+let pollingInterval = null;
+function startPolling(intervalMs = 300000) { // Mặc định tự động quét 5 phút một lần (300,000ms)
+  if (pollingInterval) clearInterval(pollingInterval);
+  
+  // Chạy ngay lần đầu tiên khi tải trang
+  syncResultsFromAPI(); 
+  
+  // Thiết lập chu kỳ lặp lại liên tục sau đó
+  pollingInterval = setInterval(() => {
+    syncResultsFromAPI();
+  }, intervalMs);
 }
 
 function manualSyncFromAPI() {
@@ -604,12 +648,17 @@ function showToast(msg, type='success'){ const t=document.getElementById('toast'
 window.onload = async () => {
   loadPersistedState();
   if (!state.matches.length) rebuildMatchesFromPlayers();
-  if (state.finalData.realFinalist1) { document.getElementById('realFinalist1').value = state.finalData.realFinalist1; document.getElementById('realFinalist2').value = state.finalData.realFinalist2; document.getElementById('realChampion').value = state.finalData.realChampion; }
-  renderPlayersList();
-  renderMatchesTable();
-  calculateAndRefreshAll();
-  await syncResultsFromAPI();
-  startPolling(300000);
+  if (state.finalData.realFinalist1) { 
+    document.getElementById('realFinalist1').value = state.finalData.realFinalist1; 
+    document.getElementById('realFinalist2').value = state.finalData.realFinalist2; 
+    document.getElementById('realChampion').value = state.finalData.realChampion; 
+  }
+  
+  // --- BỔ SUNG LỆNH NÀY ĐỂ KÍCH HOẠT TỰ ĐỘNG ---
+  startPolling(300000); // Tự động cập nhật 5 phút/lần ngay sau mỗi trận đấu
+  // ---------------------------------------------
+  
+  calculateAndRenderAll();
 };
 </script>
 </body>
