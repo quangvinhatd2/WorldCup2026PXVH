@@ -499,7 +499,7 @@ async function fetchLiveResults(manual) {
     }
 
     const now = new Date();
-    if (statusEl) statusEl.textContent = `✅ Đồng bộ lúc ${now.toLocaleTimeString('vi-VN')} · ${Object.keys(state.results).length}/72 trận đã có kết quả;
+    if (statusEl) statusEl.textContent = `✅ Đồng bộ lúc ${now.toLocaleTimeString('vi-VN')} · ${Object.keys(state.results).length}/72 trận đã có kết quả`;
   } catch (e) {
     console.error('Lỗi đồng bộ kết quả:', e);
     if (statusEl) statusEl.textContent = '⚠️ Không tải được kết quả tự động (kiểm tra kết nối mạng). Bạn vẫn có thể nhập tay ở tab "Nhập Kết Quả".';
@@ -1066,13 +1066,13 @@ function openModal(name) {
     const actual = state.results[m.tt];
     const pts = lb.perMatch[m.tt];
     let cls='pending';
-    if(pts===1) cls='correct-exact';
-    else if(pts===-2) cls='correct-win';
-    else if(pts===-4) cls='wrong';
+    if(pts===0) cls='correct-exact';
+    else if(pts===-1) cls='correct-win';
+    else if(pts===-2) cls='wrong';
     const predStr = (pred?.sA!==null&&pred?.sA!==undefined)?`${pred.sA}:${pred.sB}`:'?:?';
     const actStr = actual?`${actual.sA}:${actual.sB}`:'';
     const ptsStr = pts!==undefined?(pts>=0?'+':'')+pts+'đ':'';
-    const ptsColor = pts===1?'var(--gold)':pts===-2?'var(--gl)':pts===-4?'#f87171':'var(--tx2)';
+    const ptsColor = pts===0?'var(--gold)':pts===-1?'var(--gl)':pts===-2?'#f87171':'var(--tx2)';
     html += `<div class="pred-row ${cls}">
       <span class="pred-num">${m.tt}</span>
       <span class="pred-team">${m.teamA}</span>
