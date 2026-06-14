@@ -264,15 +264,43 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
 
   <div class="charts">
-    <div class="ccard">
-      <div class="ctitle">📈 Điểm số 28 người chơi</div>
-      <div style="position:relative;height:240px;"><canvas id="chartBar"></canvas></div>
-    </div>
-    <div class="ccard">
-      <div class="ctitle">🎯 Tỷ lệ dự đoán (tổng)</div>
-      <div style="position:relative;height:240px;"><canvas id="chartPie"></canvas></div>
+
+  <div class="ccard">
+    <div class="ctitle">📈 Điểm số 28 người chơi</div>
+    <div style="position:relative;height:240px;">
+      <canvas id="chartBar"></canvas>
     </div>
   </div>
+
+  <div class="ccard">
+    <div class="ctitle">🎯 Tỷ lệ dự đoán (tổng)</div>
+    <div style="position:relative;height:240px;">
+      <canvas id="chartPie"></canvas>
+    </div>
+  </div>
+
+  <!-- 🔥 THÊM MỚI -->
+  <div class="ccard">
+    <div class="ctitle">🏆 Top điểm</div>
+    <canvas id="chartTopScore" style="height:240px"></canvas>
+  </div>
+
+  <div class="ccard">
+    <div class="ctitle">🎯 Accuracy (%)</div>
+    <canvas id="chartAccuracy" style="height:240px"></canvas>
+  </div>
+
+  <div class="ccard">
+    <div class="ctitle">🔥 Đúng tỷ số</div>
+    <canvas id="chartExact" style="height:240px"></canvas>
+  </div>
+
+  <div class="ccard">
+    <div class="ctitle">📊 Tổng thể</div>
+    <canvas id="chartPieAdvanced" style="height:240px"></canvas>
+  </div>
+
+</div>
 
   <div class="recent" id="recentPanel" style="display:none;">
     <div class="sec-title" style="margin-bottom:10px;">🕐 Kết Quả Gần Nhất</div>
@@ -947,7 +975,127 @@ function renderPlayerCards() {
       </div>`;
     }).join('') + '</div>';
 }
+function renderChartsAdvanced() {
+  if (!state.lb || !state.lb.length) return;
 
+  // ====== DESTROY OLD CHART ======
+  ['chartTopScore','chartAccuracy','chartExact','chartPieAdvanced']
+    .forEach(id => {
+      const chart = Chart.getChart(id);
+      if (chart) chart.destroy();
+    });
+
+  // ====== CHECK DOM ======
+  const elTop = document.getElementById('chartTopScore');
+  const elAcc = document.getElementById('chartAccuracy');
+  const elExact = document.getElementById('chartExact');
+  const elPie = document.getElementById('chartPieAdvanced');
+
+  if (!elTop || !elAcc || !elExact || !elPie) {
+    console.warn("⚠️ Chart canvas chưa sẵn sàng");
+    return;
+  }
+
+  // ====== DATA ======
+  const topPlayers = [...state.lb]
+    .sort((a,b)=>b.total - a.total)
+    .slice(0, 5);
+
+  const getName = name => name.split(' ').slice(-1)[0];
+
+  const accuracyData = topPlayers.map(p => ({
+    player: getName(p.name),
+    rate: p.played ? Math.round((p.correct / p.played) * 100) : 0
+  }));
+
+  const exactData = topPlayers.map(p => ({
+    player: getName(p.name),
+    exact: p.exactScore
+  }));
+
+  const scoreData = topPlayers.map(p => ({
+    player: getName(p.name),
+    score: p.total
+  }));
+
+  // ====== CHART 1: TOP SCORE ======
+  new Chart(elTop, {
+    type: 'bar',
+    data: {
+      labels: scoreData.map(d=>d.player),
+      datasets: [{
+        label: 'Điểm',
+        data: scoreData.map(d=>d.score),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display:false } },
+      scales: { y: { beginAtZero:true } }
+    }
+  });
+
+  // ====== CHART 2: ACCURACY ======
+  new Chart(elAcc, {
+    type: 'bar',
+    data: {
+      labels: accuracyData.map(d=>d.player),
+      datasets: [{
+        label: '% Đúng',
+        data: accuracyData.map(d=>d.rate),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display:false } },
+      scales: {
+        y: { beginAtZero:true, max:100 }
+      }
+    }
+  });
+
+  // ====== CHART 3: EXACT ======
+  new Chart(elExact, {
+    type: 'bar',
+    data: {
+      labels: exactData.map(d=>d.player),
+      datasets: [{
+        label: 'Đúng tỷ số',
+        data: exactData.map(d=>d.exact),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display:false } },
+      scales: { y: { beginAtZero:true } }
+    }
+  });
+
+  // ====== CHART 4: PIE ======
+  const totalExact = state.lb.reduce((s,p)=>s+p.exactScore,0);
+  const totalCorrect = state.lb.reduce((s,p)=>s+p.correct,0);
+  const totalWrong = state.lb.reduce((s,p)=>s+p.wrong,0);
+
+  new Chart(elPie, {
+    type: 'pie',
+    data: {
+      labels: ['Đúng tỷ số','Đúng đội','Sai'],
+      datasets: [{
+        data: [
+          totalExact,
+          totalCorrect - totalExact,
+          totalWrong
+        ]
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
+}
 // ══════════════════════════════════════════
 // MODAL
 // ══════════════════════════════════════════
