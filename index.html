@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dự Đoán World Cup 2026 | Bảng Xếp Hạng Tự Động</title>
+<title>Dự Đoán World Cup 2026 | Tự động cập nhật kết quả thật</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -191,7 +191,7 @@ tr:hover td{background:rgba(255,255,255,0.03);}
 <div id="toast" class="toast"><span id="toastIcon">✅</span><span id="toastMsg"></span></div>
 
 <script>
-// ======================= DANH SÁCH 28 NGƯỜI CHƠI (HỌ TÊN ĐẦY ĐỦ) =======================
+// ======================= DANH SÁCH 28 NGƯỜI CHƠI =======================
 const PLAYER_NAMES = [
   "Nguyễn Anh Tuấn", "Trần Thế Anh", "Phạm Văn Dần", "Dương Đăng Tiến", "Đinh Anh Dũng",
   "Trần Xuân Đồng", "Trần Xuân Đức", "Nguyễn Tiến Giáp", "Nguyễn Văn Hải", "Phạm Bá Hạnh",
@@ -200,6 +200,107 @@ const PLAYER_NAMES = [
   "Trương Văn Thành", "Nguyễn Huy Thủy", "Nguyễn Hữu Tiến", "Thái Văn Tráng", "Đậu Xuân Trung",
   "Đào Duy Tùng", "Nguyễn Quang Vinh", "Nguyễn Tiến Vũ"
 ];
+
+// ======================= MAP TÊN API -> TÊN TRONG FILE EXCEL =======================
+const TEAM_NAME_MAP = {
+  // Ánh xạ từ tên API (tiếng Đức/Anh) sang tên trong file Excel của bạn
+  "Südkorea": "Hàn Quốc",
+  "Korea Republic": "Hàn Quốc",
+  "Tschechien": "CH Séc",
+  "Czech Republic": "CH Séc",
+  "USA": "Mỹ",
+  "United States": "Mỹ",
+  "Kanada": "Canada",
+  "Bosnien-Herzegowina": "Bosnia/Herzeg.",
+  "Bosnia and Herzegovina": "Bosnia/Herzeg.",
+  "Paraguay": "Paraguay",
+  "Haiti": "Haiti",
+  "Schottland": "Scotland",
+  "Scotland": "Scotland",
+  "Australien": "Australia",
+  "Australia": "Australia",
+  "Türkei": "Thổ Nhĩ Kỳ",
+  "Turkey": "Thổ Nhĩ Kỳ",
+  "Brasilien": "Brazil",
+  "Brazil": "Brazil",
+  "Marokko": "Ma Rốc",
+  "Morocco": "Ma Rốc",
+  "Katar": "Qatar",
+  "Qatar": "Qatar",
+  "Schweiz": "Thụy Sĩ",
+  "Switzerland": "Thụy Sĩ",
+  "Elfenbeinküste": "Ivory Coast",
+  "Ivory Coast": "Ivory Coast",
+  "Ecuador": "Ecuador",
+  "Deutschland": "Đức",
+  "Germany": "Đức",
+  "Curaçao": "Curacao",
+  "Niederlande": "Hà Lan",
+  "Netherlands": "Hà Lan",
+  "Japan": "Nhật Bản",
+  "Schweden": "Thụy Điển",
+  "Sweden": "Thụy Điển",
+  "Tunesien": "Tunisia",
+  "Tunisia": "Tunisia",
+  "Saudi-Arabien": "Ả Rập Xê Út",
+  "Saudi Arabia": "Ả Rập Xê Út",
+  "Uruguay": "Uruguay",
+  "Spanien": "Tây Ban Nha",
+  "Spain": "Tây Ban Nha",
+  "Kap Verde": "Cape Verde",
+  "Cape Verde": "Cape Verde",
+  "Iran": "Iran",
+  "Neuseeland": "New Zealand",
+  "New Zealand": "New Zealand",
+  "Belgien": "Bỉ",
+  "Belgium": "Bỉ",
+  "Ägypten": "Ai Cập",
+  "Egypt": "Ai Cập",
+  "Irak": "Iraq",
+  "Iraq": "Iraq",
+  "Norwegen": "Na Uy",
+  "Norway": "Na Uy",
+  "Frankreich": "Pháp",
+  "France": "Pháp",
+  "Senegal": "Senegal",
+  "Argentinien": "Argentina",
+  "Argentina": "Argentina",
+  "Algerien": "Algeria",
+  "Algeria": "Algeria",
+  "Österreich": "Áo",
+  "Austria": "Áo",
+  "Jordanien": "Jordan",
+  "Jordan": "Jordan",
+  "England": "Anh",
+  "Kroatien": "Croatia",
+  "Croatia": "Croatia",
+  "Ghana": "Ghana",
+  "Panama": "Panama",
+  "Portugal": "Bồ Đào Nha",
+  "DR Kongo": "Congo",
+  "Congo": "Congo",
+  "Usbekistan": "Uzbekistan",
+  "Uzbekistan": "Uzbekistan",
+  "Kolumbien": "Colombia",
+  "Colombia": "Colombia",
+  "Mexiko": "Mexico",
+  "Mexico": "Mexico",
+  "Südafrika": "Nam Phi",
+  "South Africa": "Nam Phi"
+};
+
+// Hàm chuyển đổi tên đội từ API sang tên trong file Excel
+function mapTeamName(apiName) {
+  if (!apiName) return "";
+  // Tìm trong map
+  for (const [api, local] of Object.entries(TEAM_NAME_MAP)) {
+    if (apiName.toLowerCase() === api.toLowerCase()) {
+      return local;
+    }
+  }
+  // Nếu không tìm thấy, giữ nguyên
+  return apiName;
+}
 
 // ======================= ĐỊNH NGHĨA 104 TRẬN =======================
 const MATCH_DEFINITIONS = [];
@@ -212,7 +313,7 @@ for(let i=73;i<=104;i++) MATCH_DEFINITIONS.push({ tt:i, teamA:`Đội K${i}`, te
 
 let state = { players: {}, results: {}, autoLocked: new Set(), finalData: { realFinalist1: "", realFinalist2: "", realChampion: "" } };
 
-// ======================= DỰ ĐOÁN GỐC VÀ BONUS CHÍNH XÁC THEO 28 FILE =======================
+// ======================= DỰ ĐOÁN GỐC =======================
 function buildEmbeddedPlayerData() {
   let players = {};
   PLAYER_NAMES.forEach(name => {
@@ -227,7 +328,7 @@ function buildEmbeddedPlayerData() {
     players[name] = { name, predictions: preds, bonus: { finalist1: "", finalist2: "", champion: "" }, totalPoints:0, groupPoints:0, koPoints:0, exactScoresVB:0, exactResultsVB:0, bonusPoints:0 };
   });
 
-  // Cập nhật bonus theo từng file Excel
+  // Bonus theo 28 file Excel
   players["Nguyễn Anh Tuấn"] && (players["Nguyễn Anh Tuấn"].bonus = { finalist1: "Brazil", finalist2: "Anh", champion: "Anh" });
   players["Trần Thế Anh"] && (players["Trần Thế Anh"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Brazil", champion: "Tây Ban Nha" });
   players["Phạm Văn Dần"] && (players["Phạm Văn Dần"].bonus = { finalist1: "Brazil", finalist2: "Anh", champion: "Anh" });
@@ -269,17 +370,28 @@ async function fetchRealResults(manual=false) {
     if(!response.ok) throw new Error('Không thể kết nối API');
     const data = await response.json();
     let updated=0;
+    
     data.forEach(apiMatch => {
-      const matchObj = MATCH_DEFINITIONS.find(m => m.teamA===apiMatch.team1?.teamName && m.teamB===apiMatch.team2?.teamName);
+      // Chuyển đổi tên đội từ API sang tên trong file Excel
+      const apiTeamA = mapTeamName(apiMatch.team1?.teamName);
+      const apiTeamB = mapTeamName(apiMatch.team2?.teamName);
+      
+      // Tìm trận đấu khớp trong hệ thống
+      const matchObj = MATCH_DEFINITIONS.find(m => 
+        m.teamA === apiTeamA && m.teamB === apiTeamB
+      );
+      
       if(matchObj && apiMatch.matchIsFinished){
-        const result = apiMatch.matchResults?.find(r=>r.resultTypeID===2);
+        const result = apiMatch.matchResults?.find(r=>r.resultTypeID===2); // Endergebnis
         if(result){
           state.results[matchObj.tt] = { sA: result.pointsTeam1, sB: result.pointsTeam2 };
           state.autoLocked.add(matchObj.tt);
           updated++;
+          console.log(`Đã cập nhật: ${matchObj.tt} - ${apiTeamA} ${result.pointsTeam1}:${result.pointsTeam2} ${apiTeamB}`);
         }
       }
     });
+    
     if(statusSpan){ statusSpan.textContent=`Đồng bộ thành công (+${updated} trận)`; statusSpan.className="api-badge success"; }
     document.getElementById('api-time-text').innerText = "Cập nhật: "+new Date().toLocaleTimeString('vi-VN');
     if(manual) showToast(`Đã đồng bộ ${updated} trận từ API World Cup 2026`);
