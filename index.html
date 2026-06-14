@@ -510,6 +510,7 @@ async function fetchLiveResults(manual) {
 }
 let lastRanking = [];
 let lastTopPlayer = null;
+let lastResults = {};
 // Tự động đồng bộ ngay khi mở trang, và lặp lại mỗi 5 phút (miễn phí, không cần API key)
 function startAutoSync() {
   fetchLiveResults(false);
@@ -627,23 +628,22 @@ function calcBonus(player) {
   }
 
   if (losers.length > 0) {
-    const shuffled = shuffle([...losers]);
-    const top = shuffled.slice(0, 3);
+  const shuffled = shuffle([...losers]);
+  const top = shuffled.slice(0, 3);
 
-    let namesText = top.join(", ");
+  let namesText = top.join(", ");
 
-    if (losers.length > 3) {
-      namesText += ` + ${losers.length - 3} người khác`;
-    }
-
-    const msg = random(loseMsgs).replace("{names}", namesText);
-    showToast(msg, 'err');
-    return;
+  if (losers.length > 3) {
+    namesText += ` + ${losers.length - 3} người khác`;
   }
+
+  const msg = random(loseMsgs).replace("{names}", namesText);
+  showToast(msg, 'err');
+  return;
 }
 
-  // 🤝 fallback (ai cũng đoán gần đúng)
-  showToast("🤝 Trận này ai cũng đoán khá sát 😆", 'ok');
+// 🤝 fallback (ai cũng đoán gần đúng)
+showToast("🤝 Trận này ai cũng đoán khá sát 😆", 'ok');
 }
 
 function calculate() {
