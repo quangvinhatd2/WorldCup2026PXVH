@@ -499,7 +499,7 @@ async function fetchLiveResults(manual) {
     }
 
     const now = new Date();
-    if (statusEl) statusEl.textContent = `✅ Đồng bộ lúc ${now.toLocaleTimeString('vi-VN')} · ${Object.keys(state.results).length}/72 trận đã có kết quả · Nguồn miễn phí: openfootball.github.io`;
+    if (statusEl) statusEl.textContent = `✅ Đồng bộ lúc ${now.toLocaleTimeString('vi-VN')} · ${Object.keys(state.results).length}/72 trận đã có kết quả;
   } catch (e) {
     console.error('Lỗi đồng bộ kết quả:', e);
     if (statusEl) statusEl.textContent = '⚠️ Không tải được kết quả tự động (kiểm tra kết nối mạng). Bạn vẫn có thể nhập tay ở tab "Nhập Kết Quả".';
@@ -750,6 +750,11 @@ lastResults = JSON.parse(JSON.stringify(state.results));
 
 // Render UI
 renderDashboard();
+
+setTimeout(() => {
+  setTimeout(() => renderChartsAdvanced(), 0); // 🔥 đảm bảo DOM đã có canvas
+}, 0);
+
 renderPlayerCards();
 
 } // 🔥🔥🔥 THIẾU DẤU NÀY → THÊM VÀO ĐÂY
