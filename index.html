@@ -581,11 +581,10 @@ function calcBonus(player) {
     const actual = state.results[matchIndex];
     const pts = calcPts(pred, actual);
 
-    if (pts === 0) winners.push(name);     // đúng tỷ số
-    else if (pts === -2) losers.push(name); // sai hoàn toàn
+    if (pts === 0) winners.push(name);
+    else if (pts === -2) losers.push(name);
   });
 
-  // 🎲 random helper
   function shuffle(arr) {
     return arr.sort(() => 0.5 - Math.random());
   }
@@ -594,7 +593,6 @@ function calcBonus(player) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  // 🎉 message templates
   const winMsgs = [
     "🎉 {names} đoán chuẩn như VAR!",
     "🔥 {names} bắt kèo quá đỉnh!",
@@ -611,39 +609,31 @@ function calcBonus(player) {
     "💀 {names} hôm nay dự đoán hơi tâm linh!"
   ];
 
-  // 🎯 XỬ LÝ WINNERS
   if (winners.length > 0) {
     const shuffled = shuffle([...winners]);
     const top = shuffled.slice(0, 3);
-
     let namesText = top.join(", ");
-
     if (winners.length > 3) {
       namesText += ` + ${winners.length - 3} người khác`;
     }
-
     const msg = random(winMsgs).replace("{names}", namesText);
     showToast(msg, 'ok');
     return;
   }
 
   if (losers.length > 0) {
-  const shuffled = shuffle([...losers]);
-  const top = shuffled.slice(0, 3);
-
-  let namesText = top.join(", ");
-
-  if (losers.length > 3) {
-    namesText += ` + ${losers.length - 3} người khác`;
+    const shuffled = shuffle([...losers]);
+    const top = shuffled.slice(0, 3);
+    let namesText = top.join(", ");
+    if (losers.length > 3) {
+      namesText += ` + ${losers.length - 3} người khác`;
+    }
+    const msg = random(loseMsgs).replace("{names}", namesText);
+    showToast(msg, 'err');
+    return;
   }
 
-  const msg = random(loseMsgs).replace("{names}", namesText);
-  showToast(msg, 'err');
-  return;
-}
-
-// 🤝 fallback (ai cũng đoán gần đúng)
-showToast("🤝 Trận này ai cũng đoán khá sát 😆", 'ok');
+  showToast("🤝 Trận này ai cũng đoán khá sát 😆", 'ok');
 }
 
 function calculate() {
@@ -654,31 +644,20 @@ function calculate() {
     MATCHES.forEach(m => {
       const actual = state.results[m.tt];
       if (!actual) return;
-
       played++;
-
       const pred = player.predictions[m.tt];
       const pts = calcPts(pred, actual);
       if (pts === null) return;
-
       total += pts;
       perMatch[m.tt] = pts;
-
       const pA = pred?.sA, pB = pred?.sB;
       const rA = actual.sA, rB = actual.sB;
-
       if (pA === rA && pB === rB) {
         exactScore++;
         correct++;
-      } 
-      else if (
-        (pA > pB && rA > rB) ||
-        (pA < pB && rA < rB) ||
-        (pA === pB && rA === rB)
-      ) {
+      } else if ((pA > pB && rA > rB) || (pA < pB && rA < rB) || (pA === pB && rA === rB)) {
         correct++;
-      } 
-      else {
+      } else {
         wrong++;
       }
     });
@@ -686,85 +665,45 @@ function calculate() {
     const { pts: bonus } = calcBonus(player);
     total += bonus;
 
-    return {
-      name,
-      total,
-      correct,
-      exactScore,
-      wrong,
-      played,
-      bonus,
-      perMatch,
-      finalist1: player.finalist1,
-      finalist2: player.finalist2,
-      champion: player.champion
-    };
+    return { name, total, correct, exactScore, wrong, played, bonus, perMatch, finalist1: player.finalist1, finalist2: player.finalist2, champion: player.champion };
   });
 
-  // Sắp xếp BXH
   state.lb.sort((a, b) => b.total - a.total);
 
-  // 📈 detect leo hạng
   state.lb.forEach((p, index) => {
     const oldIndex = lastRanking.findIndex(x => x.name === p.name);
-
-    if (oldIndex === -1) {
-      p.rankUp = 0;
-    }
-    else if (oldIndex > index) {
-      p.rankUp = oldIndex - index;
-    } else {
-      p.rankUp = 0;
-    }
-
+    p.rankUp = (oldIndex > index) ? oldIndex - index : 0;
     p.rank = index + 1;
   });
 
-  // 🏆 detect đổi top
   const currentTop = state.lb[0]?.name;
-
   if (lastTopPlayer && lastTopPlayer !== currentTop) {
     showTopChange(currentTop);
   }
-
   lastTopPlayer = currentTop;
-
-  // lưu BXH
   lastRanking = state.lb.map(p => ({ name: p.name }));
 
-  // 🔥 GỌI THÔNG BÁO (CHỈ 1 LẦN / TRẬN)
   MATCHES.forEach(m => {
     const current = state.results[m.tt];
     if (!current) return;
-
     const prev = lastResults[m.tt];
-
     if (!prev || prev.sA !== current.sA || prev.sB !== current.sB) {
       notifyAfterMatch(m.tt);
     }
   });
 
-  // lưu snapshot
   lastResults = JSON.parse(JSON.stringify(state.results));
-
-  // Render UI
   renderDashboard();
-  renderChartsAdvanced();  // ← Gọi trực tiếp, không cần setTimeout lồng nhau
+  renderChartsAdvanced();
   renderPlayerCards();
+}
 
-} // ← ĐÓNG HÀM calculate TẠI ĐÂY
-
-// ===== OUTSIDE calculate =====
 function showTopChange(name) {
   const el = document.createElement("div");
   el.className = "top-change";
   el.innerHTML = `🏆 ${name} đã vươn lên dẫn đầu!`;
-
   document.body.appendChild(el);
-
-  setTimeout(() => {
-    el.remove();
-  }, 3000);
+  setTimeout(() => el.remove(), 3000);
 }
 // ══════════════════════════════════════════
 // RENDER DASHBOARD
