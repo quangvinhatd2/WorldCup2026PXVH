@@ -626,7 +626,6 @@ function calcBonus(player) {
     return;
   }
 
-  // 💀 XỬ LÝ LOSERS (khi không ai đúng)
   if (losers.length > 0) {
     const shuffled = shuffle([...losers]);
     const top = shuffled.slice(0, 3);
@@ -641,6 +640,7 @@ function calcBonus(player) {
     showToast(msg, 'err');
     return;
   }
+}
 
   // 🤝 fallback (ai cũng đoán gần đúng)
   showToast("🤝 Trận này ai cũng đoán khá sát 😆", 'ok');
