@@ -406,6 +406,7 @@ const state = {
   lb: [],
   barChart: null,
   pieChart: null,
+  lastCheer: null, // Lưu câu reo hò gần nhất
 };
 
 // ══════════════════════════════════════════
@@ -529,7 +530,7 @@ function getGroup(tt) {
 // ══════════════════════════════════════════
 function calcPts(pred, actual) {
   if (!actual || actual.sA === null || actual.sB === null) return null;
-  if (!pred || pred.sA === null || pred.sB === null) return 0;
+  if (!pred || pred.sA === null || pred.sB === null) return -99; 
 
   const pA = pred.sA, pB = pred.sB;
   const rA = actual.sA, rB = actual.sB;
@@ -741,8 +742,7 @@ function renderDashboard() {
       <div><span class="rnk ${rk}">${rank<=3?['🥇','🥈','🥉'][i]:rank}</span></div>
       <div class="pinfo">
         <div class="ava">${init}</div>
-        <div><div class="pname">${p.name}</div>
-        <div class="psub">VĐ: ${p.champion||'?'} · ${acc}% đúng</div></div>
+        <div><div class="pname">${p.name}</div></div>
       </div>
       <div class="lscore ${sc}">${p.total>=0?'+':''}${p.total}</div>
       <div class="lcell pos">${p.correct}</div>
@@ -762,7 +762,7 @@ function renderDashboard() {
   const sec = lb[1];
   document.getElementById('banIcon').textContent = '🎉';
   document.getElementById('banTitle').textContent = `🏆 ${leader.name} đang dẫn đầu!`;
-  document.getElementById('banBody').textContent = `Cập nhật sau ${played} trận đấu vòng bảng. Bảng xếp hạng mới nhất!`;
+  document.getElementById('banBody').textContent = state.lastCheer || `Cập nhật sau ${played} trận đấu vòng bảng. Bảng xếp hạng mới nhất!`;
   const chips = [
     `🥇 <strong>${leader.name}</strong> dẫn đầu <strong>${leader.total>=0?'+':''}${leader.total}đ</strong> (${leader.total*3>=0?'+':''}${leader.total*3}k)`,
     sec ? `🥈 <strong>${sec.name}</strong> bám sát với <strong>${sec.total>=0?'+':''}${sec.total}đ</strong>` : null,
@@ -908,8 +908,6 @@ function renderPlayerCards() {
         <div style="width:36px;height:36px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--gold);flex-shrink:0">${init}</div>
         <div>
           <div style="font-weight:600;font-size:13px;color:var(--tx)">${p.name}</div>
-          <div style="font-size:11px;color:var(--tx2)">VĐ: ${p.champion||'?'}</div>
-          <div style="font-size:11px;color:var(--tx3)">${p.finalist1||'?'} & ${p.finalist2||'?'}</div>
         </div>
         <div style="margin-left:auto;font-size:18px;font-weight:800;${p.total>0?'color:var(--gl)':p.total<0?'color:#f87171':'color:var(--tx3)'}">${p.total>0?'+':''}${p.total}</div>
       </div>`;
@@ -1053,10 +1051,9 @@ function openModal(name) {
   `;
 
   const preds = document.getElementById('modalPreds');
-  let html = `<div style="font-size:11px;color:var(--tx2);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
-    <span style="color:var(--gold)">VĐ: ${player.champion||'?'}</span> · CK: ${player.finalist1||'?'} &amp; ${player.finalist2||'?'}
-    ${lb.bonus!==0?`· Thưởng CK: <span style="color:${lb.bonus>0?'var(--gl)':'#f87171'}">${lb.bonus>0?'+':''}${lb.bonus}đ</span>`:''}
-  </div>`;
+  let html = lb.bonus !== 0 ? `<div style="font-size:11px;color:var(--tx2);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
+    Thưởng CK: <span style="color:${lb.bonus>0?'var(--gl)':'#f87171'}">${lb.bonus>0?'+':''}${lb.bonus}đ</span>
+  </div>` : '';
 
   html += `<div style="font-size:11px;color:var(--tx2);margin-bottom:8px;display:grid;grid-template-columns:30px 1fr 80px 1fr 50px;gap:6px;padding:4px 8px;font-weight:700;">
     <span style="text-align:center">#</span><span>Đội nhà</span><span style="text-align:center">Dự đoán</span><span>Đội khách</span><span style="text-align:center">Điểm</span>
