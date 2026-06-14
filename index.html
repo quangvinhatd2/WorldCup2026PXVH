@@ -813,10 +813,10 @@ function calculate() {
 // =======================
 
 function updateMatchResult(teamA, teamB, sA, sB) {
-  const matchIndex = matches.findIndex(m =>
-    (m.teamA === teamA && m.teamB === teamB) ||
-    (m.teamA === teamB && m.teamB === teamA)
-  );
+  const match = matches.find(m =>
+  (m.teamA.includes(teamA) || teamA.includes(m.teamA)) &&
+  (m.teamB.includes(teamB) || teamB.includes(m.teamB))
+);
 
   if (matchIndex === -1) {
     console.warn("❌ Không tìm thấy trận:", teamA, teamB);
@@ -848,6 +848,8 @@ function updateMatchResult(teamA, teamB, sA, sB) {
 
 async function autoUpdateResults() {
   try {
+    console.log("⏳ Đang gọi API...");
+
     const res = await fetch("https://api-football-v1.p.rapidapi.com/v3/fixtures?league=1&season=2026", {
       headers: {
         "X-RapidAPI-Key": "YOUR_KEY"
@@ -856,20 +858,7 @@ async function autoUpdateResults() {
 
     const data = await res.json();
 
-    data.response.forEach(match => {
-      const status = match.fixture.status.short;
-
-      // 🔥 CHỈ lấy kết quả sau 90 phút
-      if (status !== "FT") return;
-
-      const teamA = normalizeTeam(match.teams.home.name);
-      const teamB = normalizeTeam(match.teams.away.name);
-
-      const sA = match.goals.home;
-      const sB = match.goals.away;
-
-      updateMatchResult(teamA, teamB, sA, sB);
-    });
+    console.log("✅ API data:", data);
 
   } catch (err) {
     console.error("❌ Auto update error:", err);
@@ -877,17 +866,7 @@ async function autoUpdateResults() {
 }
 
 // =======================
-// ⏱️ AUTO RUN
-// =======================
-
-// chạy mỗi 60 giây
-setInterval(autoUpdateResults, 60 * 1000);
-
-// chạy ngay lần đầu
-autoUpdateResults();
-// ══════════════════════════════════════════
 // UI HELPERS
-// ══════════════════════════════════════════
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('active'));
@@ -895,6 +874,20 @@ function switchTab(tab, btn) {
   if(btn) btn.classList.add('active');
   else document.querySelector('.nbtn').classList.add('active');
 }
+
+// =======================
+// INIT
+// =======================
+renderMatches();
+renderPlayerCards();
+renderScoreChart();
+renderStatsChart();
+
+// =======================
+// ⏱️ AUTO RUN (ĐẶT CUỐI)
+// =======================
+autoUpdateResults(); // chạy ngay
+setInterval(autoUpdateResults, 60 * 1000); // chạy lặp
 
 let toastT;
 function showToast(msg, type='ok') {
@@ -969,7 +962,13 @@ function notifyAfterMatch(matchIndex) {
 
   container.innerHTML = html;
 }
-  function renderStatsChart() {
+  <script>
+
+// =======================
+// CHỖ NÀY CHỈ CÓ JS
+// =======================
+
+function renderStatsChart() {
   const container = document.getElementById("chartStats");
   if (!container) return;
 
@@ -1009,20 +1008,21 @@ function notifyAfterMatch(matchIndex) {
     </div>
   `;
 }
-<!-- 📊 BIỂU ĐỒ (PHẢI ĐẶT NGOÀI SCRIPT) -->
-<div id="chartScore" style="margin-top:20px;"></div>
-<div id="chartStats" style="margin-top:20px;"></div>
-
-<script>
 
 // INIT
 renderMatches();
 renderPlayerCards();
-
-// 🔥 BẮT BUỘC
 renderScoreChart();
 renderStatsChart();
 
 </script>
+
+<!-- ======================= -->
+<!-- HTML PHẢI NẰM NGOÀI SCRIPT -->
+<!-- ======================= -->
+
+<div id="chartScore" style="margin-top:20px;"></div>
+<div id="chartStats" style="margin-top:20px;"></div>
+
 </body>
 </html>
