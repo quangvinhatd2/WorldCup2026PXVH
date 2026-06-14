@@ -3,513 +3,1026 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dự Đoán World Cup 2026 | Tự động cập nhật kết quả thật</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>Dự Đoán World Cup 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-:root {
-  --green:#1a7a3c;--green-light:#25a855;--green-dark:#0f5229;
-  --gold:#f0b429;--gold-light:#fcd34d;--gold-dark:#b45309;
+:root{
+  --g:#1a7a3c;--gl:#25a855;--gd:#0f5229;
+  --gold:#f0b429;--goldl:#fcd34d;--goldd:#b45309;
   --red:#dc2626;--bg:#0a1f0f;--bg2:#0f2d17;--bg3:#152e1c;
-  --surface:#1a3d24;--surface2:#204a2c;
-  --border:rgba(240,180,41,0.2);--border2:rgba(240,180,41,0.4);
-  --text:#f0fdf4;--text2:#86efac;--text3:#4ade80;
+  --sur:#1a3d24;--sur2:#204a2c;
+  --bdr:rgba(240,180,41,.2);--bdr2:rgba(240,180,41,.4);
+  --tx:#f0fdf4;--tx2:#86efac;--tx3:#4ade80;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background-color:var(--bg);color:var(--text);padding-bottom:60px;line-height:1.5;}
-header{background:linear-gradient(135deg,var(--green-dark),var(--bg2));padding:20px;text-align:center;border-bottom:3px solid var(--gold);box-shadow:0 4px 20px rgba(0,0,0,0.5);position:relative;}
-h1{color:var(--gold);font-size:24px;text-transform:uppercase;letter-spacing:1px;text-shadow:0 2px 4px rgba(0,0,0,0.6);margin-bottom:5px;}
-.subtitle{font-size:13px;color:var(--text2);font-style:italic;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
 
-#api-status-banner {
-  background: rgba(26, 122, 60, 0.2);
-  border: 1px solid var(--border2);
-  padding: 10px 15px;
-  margin: 15px auto 0 auto;
-  max-width: 1200px;
-  border-radius: 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.api-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-.api-badge.loading { background: #b45309; color: #fff; }
-.api-badge.success { background: #152e1c; color: var(--text3); border: 1px solid var(--text3); }
-.api-badge.error { background: #5c0f0f; color: #fca5a5; }
+.hdr{background:linear-gradient(135deg,var(--gd) 0%,var(--bg) 60%);border-bottom:1px solid var(--bdr2);position:relative;overflow:hidden;}
+.hdr::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(240,180,41,.03) 40px,rgba(240,180,41,.03) 41px);pointer-events:none;}
+.hdr-in{max-width:1280px;margin:0 auto;padding:18px 28px 14px;display:flex;align-items:center;gap:16px;position:relative;z-index:1;flex-wrap:wrap;}
+.trophy{font-size:44px;filter:drop-shadow(0 0 10px rgba(240,180,41,.6));animation:pulse 3s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.hdr-text h1{font-size:20px;font-weight:800;letter-spacing:1px;background:linear-gradient(90deg,var(--goldl),var(--gold),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;}
+.hdr-text p{font-size:11px;color:var(--tx2);margin-top:3px;letter-spacing:2px;text-transform:uppercase;}
+.hdr-nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;}
+.nbtn{background:transparent;border:1px solid var(--bdr2);color:var(--tx2);padding:7px 15px;border-radius:20px;cursor:pointer;font-size:12px;transition:all .2s;font-weight:500;}
+.nbtn:hover,.nbtn.active{background:var(--gold);border-color:var(--gold);color:var(--bg);}
 
-.main-nav{display:flex;justify-content:center;background:var(--bg3);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);flex-wrap:wrap;}
-.nav-btn{background:none;border:none;color:var(--text2);padding:14px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;border-bottom:3px solid transparent;}
-.nav-btn:hover{color:var(--gold-light);background:rgba(255,255,255,0.02);}
-.nav-btn.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(240,180,41,0.05);}
+.main{max-width:1280px;margin:0 auto;padding:22px 28px;}
+.tab{display:none;}.tab.active{display:block;}
 
-.container{max-width:1200px;margin:20px auto;padding:0 15px;}
-.tab-content{display:none;}
-.tab-content.active{display:block;animation:fadeIn 0.3s ease-in-out;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+/* ANNOUNCE */
+.banner{background:linear-gradient(135deg,var(--gd),var(--bg2));border:1px solid var(--bdr2);border-radius:16px;padding:20px 24px;margin-bottom:20px;display:none;position:relative;overflow:hidden;}
+.banner::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(240,180,41,.15),transparent 70%);pointer-events:none;}
+.banner.show{display:flex;align-items:flex-start;gap:16px;}
+.ban-icon{font-size:40px;flex-shrink:0;}
+.ban-text h2{font-size:19px;color:var(--gold);font-weight:700;margin-bottom:3px;}
+.ban-text p{font-size:13px;color:var(--tx2);line-height:1.5;}
+.ban-chips{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;}
+.chip{background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.3);border-radius:10px;padding:6px 12px;font-size:12px;color:var(--goldl);}
+.chip strong{color:var(--gold);}
 
-.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
-.card-title{font-size:16px;color:var(--gold);margin-bottom:15px;border-left:4px solid var(--gold);padding-left:10px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.scard{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center;transition:transform .2s;}
+.scard:hover{transform:translateY(-2px);border-color:var(--bdr2);}
+.scard .ico{font-size:24px;margin-bottom:6px;}
+.scard .val{font-size:24px;font-weight:800;color:var(--gold);line-height:1;}
+.scard .lbl{font-size:11px;color:var(--tx2);margin-top:4px;}
 
-.table-wrapper{overflow-x:auto;background:var(--surface2);border-radius:6px;border:1px solid var(--border);}
-table{width:100%;border-collapse:collapse;text-align:left;font-size:14px;}
-th{background:var(--bg3);color:var(--gold-light);font-weight:600;padding:12px 10px;border-bottom:2px solid var(--border);}
-td{padding:10px;border-bottom:1px solid rgba(240,180,41,0.08);white-space:nowrap;}
-tr:hover td{background:rgba(255,255,255,0.03);}
-.rank-col{font-weight:bold;text-align:center;width:50px;}
-.rank-1{color:#fcd34d;font-size:16px;}
-.rank-2{color:#cbd5e1;font-size:15px;}
-.rank-3{color:#b45309;font-size:14px;}
-.player-name{font-weight:600;color:#fff;}
-.text-center{text-align:center;}
+/* LEADERBOARD */
+.sec-title{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--bdr);}
+.lb{background:var(--bg2);border:1px solid var(--bdr);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.lb-hdr{background:var(--sur2);padding:11px 16px;display:grid;grid-template-columns:46px 1fr 68px 68px 68px 68px 75px 75px;gap:5px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold);border-bottom:1px solid var(--bdr2);}
+.lb-hdr span:not(:first-child):not(:nth-child(2)){text-align:center;}
+.lb-row{padding:11px 16px;display:grid;grid-template-columns:46px 1fr 68px 68px 68px 68px 75px 75px;gap:5px;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;font-size:13px;cursor:pointer;}
+.lb-row:last-child{border-bottom:none;}
+.lb-row:hover{background:rgba(255,255,255,.04);}
+.lb-row.top1{background:rgba(240,180,41,.09);}.lb-row.top1:hover{background:rgba(240,180,41,.13);}
+.lb-row.top2{background:rgba(192,192,192,.06);}
+.lb-row.top3{background:rgba(205,127,50,.06);}
+.rnk{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;background:var(--sur);color:var(--tx2);}
+.rnk.r1{background:linear-gradient(135deg,#b8860b,var(--gold));color:#fff;box-shadow:0 2px 8px rgba(240,180,41,.4);}
+.rnk.r2{background:linear-gradient(135deg,#666,#aaa);color:#fff;}
+.rnk.r3{background:linear-gradient(135deg,#7a3a0d,#cd7f32);color:#fff;}
+.pinfo{display:flex;align-items:center;gap:8px;}
+.ava{width:32px;height:32px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:var(--gold);flex-shrink:0;}
+.pname{font-weight:600;color:var(--tx);font-size:13px;}
+.psub{font-size:10px;color:var(--tx3);}
+.lcell{text-align:center;font-weight:500;font-size:12px;color:var(--tx2);}
+.lscore{text-align:center;font-weight:800;font-size:18px;}
+.lbonus{text-align:center;font-size:12px;font-weight:600;}
+.pos{color:var(--gl);}.neg{color:#f87171;}.zer{color:var(--tx3);}
 
-.grid-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px;}
-.match-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px;position:relative;transition:border 0.2s;}
-.match-card:hover{border-color:var(--border2);}
-.m-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:8px;border-bottom:1px solid rgba(240,180,41,0.05);padding-bottom:4px;}
-.m-row{display:flex;align-items:center;justify-content:space-between;margin:4px 0;}
-.m-team{font-size:13px;font-weight:500;color:#fff;max-width:160px;overflow:hidden;text-overflow:ellipsis;}
-.m-input{width:55px;background:var(--bg);border:1px solid var(--border);color:#fff;text-align:center;padding:4px;border-radius:4px;font-weight:bold;font-size:14px;}
-.m-input:focus{border-color:var(--gold);outline:none;}
-.lock-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:2px;color:rgba(255,255,255,0.3);transition:color 0.2s;}
-.lock-btn:hover{color:var(--gold);}
-.lock-btn.locked{color:var(--gold);}
+/* CHARTS */
+.charts{display:grid;grid-template-columns:1.4fr .6fr;gap:16px;margin-bottom:20px;}
+.ccard{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:16px;}
+.ctitle{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:12px;}
 
-.select-box{background:var(--surface2);border:1px solid var(--border);color:#fff;padding:10px;font-size:14px;border-radius:6px;width:100%;max-width:300px;margin-bottom:15px;font-weight:600;}
-.player-meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin-bottom:15px;}
-.meta-item{background:var(--surface2);padding:10px 15px;border-radius:6px;border:1px solid rgba(240,180,41,0.05);}
-.meta-label{font-size:11px;color:var(--text2);text-transform:uppercase;}
-.meta-val{font-size:15px;font-weight:bold;color:var(--gold-light);margin-top:2px;}
+/* RECENT */
+.recent{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:20px;}
+.mrow{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:10px;}
+.mrow:last-child{border-bottom:none;}
+.mnum{font-size:10px;color:var(--tx3);width:20px;text-align:center;font-weight:600;}
+.mteams{flex:1;font-size:12px;color:var(--tx);}
+.mscore{font-size:16px;font-weight:800;color:var(--gold);min-width:55px;text-align:center;}
+.mtag{font-size:10px;padding:2px 7px;border-radius:7px;font-weight:600;background:var(--sur);color:var(--tx2);}
 
-.detail-row{display:flex;align-items:center;padding:8px 10px;border-radius:4px;margin-bottom:6px;font-size:13px;flex-wrap:wrap;gap:8px;}
-.detail-row:nth-child(even){background:rgba(255,255,255,0.01);}
-.det-tt{width:40px;font-weight:bold;color:var(--text3);font-size:11px;}
-.det-teams{flex:2;color:#fff;min-width:150px;}
-.det-pred{width:70px;text-align:center;font-weight:600;color:var(--gold-light);background:rgba(0,0,0,0.15);padding:2px 4px;border-radius:4px;}
-.det-real{width:70px;text-align:center;font-weight:600;color:#fff;}
-.det-score{width:110px;text-align:right;font-weight:bold;}
-.score-green{color:var(--text3);}
-.score-orange{color:#f59e0b;}
-.score-red{color:#ef4444;}
+/* MATCH INPUT */
+.round-sel{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.rbtn{background:var(--sur);border:1px solid var(--bdr);color:var(--tx2);padding:6px 14px;border-radius:18px;cursor:pointer;font-size:12px;transition:all .2s;font-weight:500;}
+.rbtn.active{background:var(--g);border-color:var(--gl);color:#fff;}
+.tbl-wrap{overflow-x:auto;border-radius:12px;margin-bottom:20px;}
+.mtbl{width:100%;border-collapse:collapse;background:var(--bg2);font-size:13px;}
+.mtbl th{background:var(--sur2);color:var(--gold);padding:10px 10px;text-align:center;font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--bdr2);}
+.mtbl th:nth-child(2){text-align:right;}.mtbl th:nth-child(4){text-align:left;}
+.mtbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+.mtbl tr:last-child td{border-bottom:none;}
+.mtbl tr:hover td{background:rgba(255,255,255,.02);}
+.tname{font-weight:600;color:var(--tx);}
+.tr{text-align:right;}.tl{text-align:left;}
+.sinputs{display:flex;align-items:center;gap:4px;justify-content:center;}
+.sin{width:44px;height:32px;background:var(--sur);border:1px solid var(--bdr2);border-radius:7px;color:var(--tx);font-size:16px;font-weight:700;text-align:center;outline:none;transition:all .2s;}
+.sin:focus{border-color:var(--gold);background:var(--sur2);box-shadow:0 0 0 2px rgba(240,180,41,.15);}
+.sin::-webkit-inner-spin-button{-webkit-appearance:none;}
+.ssep{color:var(--gold);font-weight:700;}
+.sbadge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600;white-space:nowrap;}
+.sdone{background:rgba(37,168,85,.2);color:var(--gl);}
+.spending{background:rgba(255,255,255,.07);color:var(--tx3);}
+.rtag{font-size:10px;padding:2px 7px;border-radius:7px;font-weight:600;background:var(--sur);color:var(--tx2);}
 
-.final-settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:15px;}
-.final-group{display:flex;flex-direction:column;}
-.final-group label{font-size:12px;color:var(--text2);margin-bottom:4px;}
-.final-group input{background:var(--bg);border:1px solid var(--border);color:#fff;padding:8px 12px;border-radius:4px;font-size:14px;}
+/* BONUS PANEL */
+.bpanel{background:var(--bg2);border:1px solid var(--bdr2);border-radius:14px;padding:20px;margin-bottom:16px;}
+.bpanel h3{color:var(--gold);font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.binputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.bgroup{background:var(--sur);border-radius:10px;padding:14px;}
+.bgroup label{display:block;font-size:11px;color:var(--tx2);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.bteams{display:flex;gap:8px;}
+.btin{flex:1;background:var(--bg);border:1px solid var(--bdr2);border-radius:7px;color:var(--tx);font-size:13px;padding:8px 10px;outline:none;transition:all .2s;}
+.btin:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,180,41,.15);}
+.guide{background:var(--sur);border-radius:10px;padding:12px 14px;}
+.guide h4{color:var(--tx3);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.grow{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;}
+.grow:last-child{border-bottom:none;}
+.gpts.pos{color:var(--gl);font-weight:700;}.gpts.neg{color:#f87171;font-weight:700;}
 
-.toast{position:fixed;bottom:-100px;left:50%;transform:translateX(-50%);background:var(--bg3);border:2px solid var(--gold);padding:12px 25px;border-radius:30px;box-shadow:0 10px 25px rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;gap:10px;transition:bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);visibility:hidden;}
-.toast.show{bottom:30px;visibility:visible;}
-.toast.error{border-color:var(--red);}
+/* SAVE BAR */
+.savebar{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--bdr);}
+.btnp{background:var(--gold);color:var(--bg);border:none;padding:10px 24px;border-radius:18px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btnp:hover{background:var(--goldl);transform:translateY(-1px);box-shadow:0 4px 12px rgba(240,180,41,.3);}
+.btns{background:transparent;color:var(--tx2);border:1px solid var(--bdr2);padding:10px 24px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btns:hover{background:var(--sur);}
 
-.chart-container{position:relative;height:300px;width:100%;margin-top:15px;}
-.rules-list{padding-left:20px;font-size:13px;color:var(--text2);}
-.rules-list li{margin-bottom:6px;}
-.btn-action{background:var(--gold);color:#000;border:none;padding:8px 15px;font-size:13px;font-weight:bold;border-radius:4px;cursor:pointer;transition:background 0.2s;}
-.btn-action:hover{background:var(--gold-light);}
-.recent-panel{background:rgba(240,180,41,0.03);border:1px dashed var(--border2);padding:12px;border-radius:6px;margin-bottom:15px;}
-.match-result-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.05);padding:4px 0;flex-wrap:wrap;gap:6px;}
-.match-badge{background:var(--surface2);padding:2px 5px;border-radius:3px;font-weight:bold;color:var(--gold);}
-.match-round-tag{font-size:10px;background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:2px;}
+/* PLAYER DETAIL MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:18px;width:100%;max-width:700px;max-height:85vh;overflow-y:auto;padding:24px;}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.modal-hdr h2{font-size:17px;color:var(--gold);font-weight:700;}
+.modal-close{background:none;border:none;color:var(--tx2);font-size:22px;cursor:pointer;padding:4px;}
+.modal-close:hover{color:var(--tx);}
+.modal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.mstat{background:var(--sur);border-radius:10px;padding:12px;text-align:center;}
+.mstat .mv{font-size:20px;font-weight:800;color:var(--gold);}
+.mstat .ml{font-size:10px;color:var(--tx2);margin-top:3px;}
+.pred-list{display:flex;flex-direction:column;gap:4px;}
+.pred-row{display:grid;grid-template-columns:30px 1fr 80px 1fr 50px;gap:6px;align-items:center;padding:6px 8px;border-radius:8px;font-size:12px;}
+.pred-row.correct-exact{background:rgba(37,168,85,.15);}
+.pred-row.correct-win{background:rgba(37,168,85,.08);}
+.pred-row.wrong{background:rgba(220,38,38,.1);}
+.pred-row.pending{background:rgba(255,255,255,.03);}
+.pred-num{color:var(--tx3);font-weight:600;text-align:center;}
+.pred-team{font-weight:600;}
+.pred-score{text-align:center;font-weight:700;font-size:13px;}
+.pred-pts{text-align:center;font-weight:700;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--g);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.4);transform:translateY(70px);opacity:0;transition:all .3s;z-index:9999;display:flex;align-items:center;gap:8px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.err{background:var(--red);}
+
+.empty{text-align:center;padding:48px 20px;color:var(--tx2);}
+.empty .eico{font-size:52px;margin-bottom:12px;opacity:.5;}
+.empty h3{font-size:16px;color:var(--tx3);margin-bottom:6px;}
+.empty p{font-size:13px;}
 
 @media(max-width:768px){
-  .main-nav{overflow-x:auto;justify-content:flex-start;}
-  .nav-btn{padding:12px 14px;font-size:13px;white-space:nowrap;}
-  .detail-row .det-score{width:auto;text-align:left;margin-left:auto;}
+  .hdr-in{padding:14px 14px 10px;}.hdr-nav{width:100%;}
+  .main{padding:14px;}.stats{grid-template-columns:repeat(2,1fr);}
+  .charts{grid-template-columns:1fr;}
+  .lb-hdr,.lb-row{grid-template-columns:38px 1fr 58px 58px 58px;}
+  .lb-hdr span:nth-child(n+6),.lb-row>*:nth-child(n+6){display:none;}
+  .binputs{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>🏆 DỰ ĐOÁN WORLD CUP 2026 🏆</h1>
-  <div class="subtitle">Tự động cập nhật kết quả thật & Tính điểm thời gian thực</div>
-  <div id="api-status-banner">
-    <div>📡 Kết quả thật: <span id="api-status-text" class="api-badge loading">Đang đồng bộ...</span></div>
-    <div id="api-time-text" style="color:var(--text2);">--:--</div>
-    <div><button class="btn-action" style="padding:4px 10px;" onclick="fetchRealResults(true)">🔄 Làm mới kết quả</button></div>
+<header class="hdr">
+  <div class="hdr-in">
+    <div class="trophy">🏆</div>
+    <div class="hdr-text">
+      <h1>DỰ ĐOÁN KẾT QUẢ WORLDCUP 2026</h1>
+      <p>⚽ Bảng Xếp Hạng &amp; Thống Kê Trực Tiếp · 28 Người Chơi</p>
+    </div>
+    <nav class="hdr-nav">
+      <button class="nbtn active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+      <button class="nbtn" onclick="switchTab('matches',this)">⚽ Nhập Kết Quả</button>
+      <button class="nbtn" onclick="switchTab('players',this)">👤 Chi Tiết</button>
+    </nav>
   </div>
 </header>
 
-<nav class="main-nav">
-  <button class="nav-btn active" onclick="switchTab('bxh', this)">📊 Bảng Xếp Hạng</button>
-  <button class="nav-btn" onclick="switchTab('realscore', this)">⚽ Kết Quả Thật</button>
-  <button class="nav-btn" onclick="switchTab('details', this)">🔍 Chi Tiết Người Chơi</button>
-  <button class="nav-btn" onclick="switchTab('stats', this)">📈 Thống Kê & Luật</button>
-</nav>
+<main class="main">
 
-<div class="container">
-  <div id="tab-bxh" class="tab-content active">
-    <div class="card">
-      <div class="card-title">
-        <span>Bảng Xếp Hạng (28 người chơi)</span>
-        <button class="btn-action" onclick="exportBXHToExcel()">📎 Xuất file Excel</button>
-      </div>
-      <div class="table-wrapper">
-        <table>
-          <thead><tr><th>Hạng</th><th>Người Chơi</th><th>Tổng Điểm</th><th>Vòng Bảng</th><th>Knockout</th><th>Đúng Tỉ Số (VB)</th><th>Đúng KQ (VB)</th><th>Thưởng</th></tr></thead>
-          <tbody id="bxh-body"></tbody>
-        </table>
-      </div>
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab active">
+  <div class="banner" id="banner">
+    <div class="ban-icon" id="banIcon">🎉</div>
+    <div class="ban-text" style="flex:1">
+      <h2 id="banTitle">Cập nhật kết quả mới!</h2>
+      <p id="banBody">Nhập kết quả các trận để xem bảng xếp hạng.</p>
+      <div class="ban-chips" id="banChips"></div>
     </div>
   </div>
 
-  <div id="tab-realscore" class="tab-content">
-    <div class="recent-panel" id="recentPanel" style="display:none;"><h4 style="font-size:13px;color:var(--gold);">⚡ Cập nhật gần đây:</h4><div id="recentList"></div></div>
-    <div class="card">
-      <div class="card-title">🏆 Kết quả Chung kết & Vô địch</div>
-      <div class="final-settings">
-        <div class="final-group"><label>Đội Chung kết 1</label><input type="text" id="realFinalist1" placeholder="VD: Brazil" oninput="saveFinalSettings()"></div>
-        <div class="final-group"><label>Đội Chung kết 2</label><input type="text" id="realFinalist2" placeholder="VD: Anh" oninput="saveFinalSettings()"></div>
-        <div class="final-group"><label>Đội Vô địch</label><input type="text" id="realChampion" placeholder="VD: Brazil" oninput="saveFinalSettings()"></div>
-      </div>
-      <div style="text-align:right; margin-bottom:15px;"><button class="btn-action" onclick="recalculateAll()">🔥 Tính lại toàn bộ điểm</button></div>
-      <div class="card-title">📋 Tỉ số các trận đấu (tự động từ API hoặc nhập tay)</div>
-      <div class="grid-results" id="real-matches-grid"></div>
+  <div class="stats">
+    <div class="scard"><div class="ico">👥</div><div class="val" id="sPl">28</div><div class="lbl">Người tham gia</div></div>
+    <div class="scard"><div class="ico">⚽</div><div class="val" id="sMt">0</div><div class="lbl">Trận đã cập nhật</div></div>
+    <div class="scard"><div class="ico">🏅</div><div class="val" id="sBest">—</div><div class="lbl">Điểm cao nhất</div></div>
+    <div class="scard"><div class="ico">💰</div><div class="val" id="sMoney">—</div><div class="lbl">Tiền dẫn đầu</div></div>
+  </div>
+
+  <div class="sec-title">🥇 Bảng Xếp Hạng</div>
+  <div class="lb">
+    <div class="lb-hdr">
+      <span>#</span><span>Người chơi</span>
+      <span>Điểm</span><span>Đúng đội</span><span>Đúng tỷ số</span><span>Sai</span>
+      <span>Thưởng CK</span><span>Tiền (k)</span>
+    </div>
+    <div id="lbBody"><div class="empty"><div class="eico">📋</div><h3>Chưa có kết quả</h3><p>Vào tab "Nhập Kết Quả" để bắt đầu tính điểm</p></div></div>
+  </div>
+
+  <div class="charts">
+    <div class="ccard">
+      <div class="ctitle">📈 Điểm số 28 người chơi</div>
+      <div style="position:relative;height:240px;"><canvas id="chartBar"></canvas></div>
+    </div>
+    <div class="ccard">
+      <div class="ctitle">🎯 Tỷ lệ dự đoán (tổng)</div>
+      <div style="position:relative;height:240px;"><canvas id="chartPie"></canvas></div>
     </div>
   </div>
 
-  <div id="tab-details" class="tab-content">
-    <div class="card">
-      <div class="card-title">Phiếu dự đoán chi tiết</div>
-      <select id="player-select" class="select-box" onchange="renderPlayerDetails()"></select>
-      <div class="player-meta-grid">
-        <div class="meta-item"><div class="meta-label">Tổng điểm</div><div class="meta-val" id="det-total-p">0đ</div></div>
-        <div class="meta-item"><div class="meta-label">Dự đoán Chung kết</div><div class="meta-val" id="det-bonus-f">--</div></div>
-        <div class="meta-item"><div class="meta-label">Dự đoán Vô địch</div><div class="meta-val" id="det-bonus-c">--</div></div>
-      </div>
-      <div id="player-matches-list"></div>
-    </div>
-  </div>
-
-  <div id="tab-stats" class="tab-content">
-    <div class="card"><div class="card-title">📊 Biểu đồ điểm số</div><div class="chart-container"><canvas id="chartScores"></canvas></div></div>
-    <div class="card"><div class="card-title">📖 Luật tính điểm</div><ul class="rules-list"><li><strong>VÒNG BẢNG:</strong> Đúng tỉ số = 0đ, Đúng kết quả = -1đ, Sai = -2đ</li><li><strong>VÒNG LOẠI TRỰC TIẾP:</strong> Đúng tỉ số = +1đ, Đúng kết quả = -2đ, Sai = -4đ</li><li><strong>THƯỞNG:</strong> Đúng 1 đội vào CK = +5đ (tối đa 10đ), Đúng vô địch = +10đ</li><li>💰 Mỗi điểm = 3.000 VNĐ (quy đổi tiền thưởng)</li></ul></div>
+  <div class="recent" id="recentPanel" style="display:none;">
+    <div class="sec-title" style="margin-bottom:10px;">🕐 Kết Quả Gần Nhất</div>
+    <div id="recentList"></div>
   </div>
 </div>
-<div id="toast" class="toast"><span id="toastIcon">✅</span><span id="toastMsg"></span></div>
+
+<!-- MATCHES -->
+<div id="tab-matches" class="tab">
+  <div class="sec-title">⚽ Nhập Kết Quả Thực Tế — Vòng Bảng (72 trận)</div>
+  <div class="round-sel" id="roundSel">
+    <button class="rbtn active" onclick="filterR('all',this)">Tất cả</button>
+    <button class="rbtn" onclick="filterR('A',this)">Bảng A</button>
+    <button class="rbtn" onclick="filterR('B',this)">Bảng B</button>
+    <button class="rbtn" onclick="filterR('C',this)">Bảng C</button>
+    <button class="rbtn" onclick="filterR('D',this)">Bảng D</button>
+    <button class="rbtn" onclick="filterR('E',this)">Bảng E</button>
+    <button class="rbtn" onclick="filterR('F',this)">Bảng F</button>
+    <button class="rbtn" onclick="filterR('G',this)">Bảng G</button>
+    <button class="rbtn" onclick="filterR('H',this)">Bảng H</button>
+    <button class="rbtn" onclick="filterR('I',this)">Bảng I</button>
+  </div>
+  <div class="tbl-wrap">
+    <table class="mtbl">
+      <thead><tr>
+        <th>#</th><th style="text-align:right">Đội nhà</th>
+        <th colspan="3" style="text-align:center">Kết quả thực tế</th>
+        <th style="text-align:left">Đội khách</th>
+        <th>Bảng</th><th>Trạng thái</th>
+      </tr></thead>
+      <tbody id="mTbody"></tbody>
+    </table>
+  </div>
+
+  <div class="bpanel">
+    <h3>🏆 Chung Kết &amp; Vô Địch — Nhập kết quả thực tế</h3>
+    <div class="binputs">
+      <div class="bgroup">
+        <label>🥈🥇 Hai đội vào chung kết (thực tế)</label>
+        <div class="bteams">
+          <input type="text" class="btin" id="rf1" placeholder="Đội 1..." oninput="saveFinal()">
+          <input type="text" class="btin" id="rf2" placeholder="Đội 2..." oninput="saveFinal()">
+        </div>
+      </div>
+      <div class="bgroup">
+        <label>🏆 Đội vô địch (thực tế)</label>
+        <div class="bteams">
+          <input type="text" class="btin" id="rc" placeholder="Đội vô địch..." oninput="saveFinal()">
+        </div>
+      </div>
+    </div>
+    <div class="guide">
+      <h4>📋 Thang điểm thưởng chung kết</h4>
+      <div class="grow"><span>🏆 Đoán đúng đội vô địch</span><span class="gpts pos">+10đ</span></div>
+      <div class="grow"><span>😅 Sai vô địch — đội đó có vào chung kết</span><span class="gpts neg">-3đ</span></div>
+      <div class="grow"><span>❌ Sai vô địch — đội không vào chung kết</span><span class="gpts neg">-5đ</span></div>
+      <div class="grow"><span>🎯 Đoán đúng cả 2 đội vào chung kết</span><span class="gpts pos">+10đ</span></div>
+      <div class="grow"><span>✅ Đoán đúng 1 trong 2 đội vào chung kết</span><span class="gpts pos">+5đ/đội</span></div>
+      <div class="grow"><span>❌ Đoán sai cả 2 đội vào chung kết</span><span class="gpts neg">-5đ</span></div>
+    </div>
+  </div>
+
+  <div class="savebar">
+    <button class="btns" onclick="renderMatches()">🔄 Reset form</button>
+    <button class="btnp" onclick="saveAndCalc()">💾 Lưu &amp; Tính điểm</button>
+  </div>
+</div>
+
+<!-- PLAYERS -->
+<div id="tab-players" class="tab">
+  <div class="sec-title">👤 Dự Đoán Chi Tiết Từng Người</div>
+  <div id="playerCards"></div>
+</div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-hdr">
+      <h2 id="modalTitle">Chi tiết dự đoán</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-stats" id="modalStats"></div>
+    <div class="pred-list" id="modalPreds"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastIco">✅</span><span id="toastMsg">Đã lưu!</span></div>
 
 <script>
-// ======================= DANH SÁCH 28 NGƯỜI CHƠI =======================
-const PLAYER_NAMES = [
-  "Nguyễn Anh Tuấn", "Trần Thế Anh", "Phạm Văn Dần", "Dương Đăng Tiến", "Đinh Anh Dũng",
-  "Trần Xuân Đồng", "Trần Xuân Đức", "Nguyễn Tiến Giáp", "Nguyễn Văn Hải", "Phạm Bá Hạnh",
-  "Nguyễn Trọng Hiệp", "Nguyễn Huy Hữu", "Nguyễn Đăng Kiên", "Lê Đình Long", "Nguyễn Thành Luân",
-  "Nguyễn Xuân Minh", "Bùi Công Nguyên", "Vi Văn Nhàn", "Nguyễn Quốc Trung", "Phan Thế Hùng",
-  "Trương Văn Thành", "Nguyễn Huy Thủy", "Nguyễn Hữu Tiến", "Thái Văn Tráng", "Đậu Xuân Trung",
-  "Đào Duy Tùng", "Nguyễn Quang Vinh", "Nguyễn Tiến Vũ"
+// ══════════════════════════════════════════
+// EMBEDDED PLAYER DATA
+// ══════════════════════════════════════════
+const PLAYERS_DATA = {"Nguyễn Anh Tuấn":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":0,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":1,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":0,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":1,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":0,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Pháp","champion":"Tây Ban Nha"},"Trần Thế Anh":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":2,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":1,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":3,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":5,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":4,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":2,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":3,"sB":2,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":4,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":3,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":2,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":3,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":3,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":2,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":1,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":2,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Brazil","champion":"Tây Ban Nha"},"Phạm Văn Dần":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":2,"sB":0,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":2,"sB":0,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":2,"sB":0,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":2,"sB":0,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":2,"sB":0,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":2,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":0,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":2,"sB":0,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":2,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":0,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":2,"sB":0,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":2,"sB":0,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":2,"sB":0,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":2,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":2,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":0,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":2,"sB":0,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":2,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":2,"sB":0,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":0,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":2,"sB":0,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":2,"sB":0,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":2,"sB":0,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":0,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":2,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":2,"sB":0,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":2,"sB":0,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":0,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":2,"sB":0,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":2,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":0,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":2,"sB":0,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":2,"sB":0,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":2,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":2,"sB":0,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":0,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":2,"sB":0,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":2,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Argentina","finalist2":"Pháp","champion":"Argentina"},"Dương Đăng Tiến":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":0,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":1,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":0,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":1,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":0,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Pháp","champion":"Tây Ban Nha"},"Nguyễn Tiến Giáp":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":0,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":4,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":2,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":2,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":3,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":0,"sB":1,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":3,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":2,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":4,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":3,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":2,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":2,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":0,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":3,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":1,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":3,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":1,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":3,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":1,"sB":2,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":1,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Pháp","finalist2":"Tây ban nha","champion":"Pháp"},"Nguyễn Trọng Hiệp":{"predictions":{"1":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":1,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":1,"sB":1,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":2,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":1,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":3,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":2,"sB":1,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":1,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":1,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":1,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":2,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":2,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":1,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":1,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":2,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":1,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":3,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Brazil","finalist2":"Anh","champion":"Brazil"},"Nguyễn Văn Hải":{"predictions":{"1":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":2,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":1,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":3,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":1,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":2,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":3,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":3,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":5,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":0,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":3,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":1,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":3,"sB":1,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":3,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":4,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":1,"sB":3,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":1,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":5,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":0,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":3,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":2,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":3,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":2,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":3,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":0,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":0,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":4,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":3,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":4,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":2,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":2,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":3,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":3,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":0,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":0,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":0,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":0,"sB":2,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":3,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":0,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":3,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":3,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":1,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Argentina","champion":"Argentina"},"Phạm Bá Hạnh":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":0,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":1,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":0,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":1,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":0,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Pháp","champion":"Tây Ban Nha"},"Nguyễn Huy Hữu":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":2,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":1,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":3,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":5,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":4,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":2,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":3,"sB":2,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":4,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":3,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":2,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":3,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":3,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":2,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":1,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":2,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Brazil","champion":"Brazil"},"Nguyễn Đăng Kiên":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":0,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":1,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":0,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":1,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":0,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Pháp","champion":"Tây Ban Nha"},"Lê Đình Long":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":0,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":1,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":0,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":1,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":0,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Pháp","champion":"Tây Ban Nha"},"Nguyễn Thành Luân":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":2,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":1,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":3,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":5,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":4,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":2,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":3,"sB":2,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":4,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":3,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":2,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":3,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":3,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":2,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":1,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":2,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Brazil","champion":"Brazil"},"Nguyễn Xuân Minh":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":1,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":0,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":1,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":2,"sB":1,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":0,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":0,"sB":1,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":2,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":1,"sB":1,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":1,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":2,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":0,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":1,"sB":0,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":1,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":3,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":1,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":3,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":1,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":3,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":1,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":1,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Đức","finalist2":"Brazil","champion":"Đức"},"Bùi Công Nguyên":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":0,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":1,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":0,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":0,"sB":2,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":1,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":1,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":3,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":1,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":2,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":3,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":2,"sB":1,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":0,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":3,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":1,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Brazil","champion":"Tây Ban Nha"},"Vi Văn Nhàn":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":0,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":1,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":0,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":1,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":0,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Anh","champion":"Tây Ban Nha"},"Nguyễn Quốc Trung":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":0,"sB":2,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":1,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":3,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":4,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":3,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":2,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":2,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":4,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":2,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":1,"sB":2,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":3,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":1,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":3,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":2,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":2,"sB":2,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":1,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":2,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":3,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":1,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":1,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":3,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":2,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":2,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây BanNha","finalist2":"Pháp","champion":"Pháp"},"Phan Thế Hùng":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":0,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":4,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":0,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":1,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":5,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":2,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":3,"sB":1,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":3,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":4,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":2,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":4,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":3,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":2,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":0,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":1,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":2,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":1,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":3,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":0,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":1,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":3,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":0,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":3,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":3,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":3,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":1,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây BanNha","finalist2":"Pháp","champion":"Pháp"},"Trương Văn Thành":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":0,"sB":0,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":1,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":0,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":0,"sB":2,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":1,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":1,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":3,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":1,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":2,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":3,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":2,"sB":1,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":0,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":3,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":1,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây BanNha","finalist2":"Brazil","champion":"Brazil"},"Nguyễn Huy Thuỷ":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":2,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":1,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":3,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":5,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":4,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":2,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":3,"sB":2,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":4,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":3,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":2,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":3,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":3,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":2,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":1,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":2,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":1,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":1,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":1,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":0,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":2,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":2,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Brazil","champion":"Tây Ban Nha"},"Nguyễn Hữu Tiến":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":0,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":0,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":1,"sB":2,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":2,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":3,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":1,"sB":3,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":2,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":1,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":1,"sB":1,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":1,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":1,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":1,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":2,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":1,"sB":2,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":1,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":2,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":2,"sB":1,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":3,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":2,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":2,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":2,"sB":1,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":3,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":2,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":1,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":0,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":2,"sB":1,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":1,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Anh","finalist2":"Pháp","champion":"Anh"},"Thái Văn Tráng":{"predictions":{"1":{"sA":10,"sB":20,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":2,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":1,"sB":1,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":1,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":1,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":4,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":3,"sB":1,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":1,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":1,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":2,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":2,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":1,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":1,"sB":1,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":1,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":3,"sB":1,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":0,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":1,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":3,"sB":1,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":4,"sB":2,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":1,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":1,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":2,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":2,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":1,"sB":1,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":3,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":1,"sB":1,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":2,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":4,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":2,"sB":2,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":3,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":1,"sB":3,"teamA":"Panama","teamB":"Anh"},"68":{"sA":1,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":2,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":0,"sB":1,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Pháp","finalist2":"Tây Ban Nha","champion":"Pháp"},"Đậu Xuân Trung":{"predictions":{"1":{"sA":3,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":0,"sB":0,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":1,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":0,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":1,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":3,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":3,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":3,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":5,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":0,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":1,"sB":3,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":0,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":0,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":1,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":1,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":0,"sB":1,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":0,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":0,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":0,"sB":0,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":5,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":4,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":1,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":1,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":3,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":1,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":0,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":0,"sB":2,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":0,"sB":0,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":0,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":3,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":0,"sB":0,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":1,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":0,"sB":0,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":3,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":3,"sB":1,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":0,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":0,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":3,"teamA":"Panama","teamB":"Anh"},"68":{"sA":0,"sB":0,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":0,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":3,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":0,"sB":0,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":0,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Anh","finalist2":"Tây Ban Nha","champion":"Anh"},"Đào Duy Tùng":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":0,"sB":2,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":1,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":3,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":4,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":3,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":2,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":2,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":4,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":2,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":1,"sB":2,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":3,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":1,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":3,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":2,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":2,"sB":2,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":1,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":2,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":3,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":1,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":1,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":3,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":2,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":2,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Pháp","champion":"Pháp"},"Nguyễn Quang Vinh":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":1,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":2,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":1,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":1,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":1,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":1,"sB":0,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":1,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":0,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":1,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":0,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":3,"sB":1,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":5,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":2,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":3,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":3,"sB":1,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":0,"sB":1,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":4,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":3,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":2,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":2,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":0,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":1,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":1,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":1,"sB":0,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":1,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":3,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":1,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":3,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":1,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":4,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":2,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Bồ Đào Nha","finalist2":"Đức","champion":"Đức"},"Nguyễn Tiến Vũ":{"predictions":{"1":{"sA":2,"sB":0,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":1,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":0,"sB":2,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":3,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":1,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":1,"sB":1,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":0,"sB":3,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":0,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":4,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":1,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":4,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":1,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":3,"sB":0,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":2,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":2,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":4,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":1,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":2,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":1,"sB":2,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":3,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":1,"sB":1,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":2,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":0,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":3,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":2,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":3,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":2,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":2,"sB":2,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":1,"sB":2,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":2,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":3,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":1,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":1,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":1,"sB":1,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":3,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":2,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":1,"sB":2,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây BanNha","finalist2":"Pháp","champion":"Pháp"},"Đinh Anh Dũng":{"predictions":{"1":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":1,"sB":2,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":1,"sB":2,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":1,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":1,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":2,"sB":2,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":3,"sB":1,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":1,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":1,"sB":2,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":1,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":3,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":2,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":1,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":3,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":3,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":2,"sB":1,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":1,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":2,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":1,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":2,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":1,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Bồ Đào Nha","finalist2":"Đức","champion":"Đức"},"Trần Xuân Đồng":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":0,"sB":0,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":1,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":0,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":0,"sB":2,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":1,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":1,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":3,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":1,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":2,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":3,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":2,"sB":1,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":0,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":3,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":1,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Brazil","champion":"Brazil"},"Trần Xuân Đức":{"predictions":{"1":{"sA":2,"sB":1,"teamA":"Mexico","teamB":"Nam Phi"},"2":{"sA":0,"sB":0,"teamA":"Hàn Quốc","teamB":"CH Séc"},"3":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Bosnia/Herzeg."},"4":{"sA":1,"sB":1,"teamA":"Mỹ","teamB":"Paraguay"},"5":{"sA":0,"sB":2,"teamA":"Haiti","teamB":"Scotland"},"6":{"sA":0,"sB":1,"teamA":"Australia","teamB":"Thổ Nhĩ Kỳ"},"7":{"sA":2,"sB":0,"teamA":"Brazil","teamB":"Ma Rốc"},"8":{"sA":1,"sB":2,"teamA":"Qatar","teamB":"Thụy Sĩ"},"9":{"sA":1,"sB":2,"teamA":"Ivory Coast","teamB":"Ecuador"},"10":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Curacao"},"11":{"sA":2,"sB":0,"teamA":"Hà Lan","teamB":"Nhật Bản"},"12":{"sA":2,"sB":0,"teamA":"Thụy Điển","teamB":"Tunisia"},"13":{"sA":0,"sB":2,"teamA":"Ả Rập Xê Út","teamB":"Uruguay"},"14":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Cape Verde"},"15":{"sA":0,"sB":2,"teamA":"Iran","teamB":"New Zealand"},"16":{"sA":2,"sB":0,"teamA":"Bỉ","teamB":"Ai Cập"},"17":{"sA":2,"sB":0,"teamA":"Pháp","teamB":"Senegal"},"18":{"sA":0,"sB":2,"teamA":"Iraq","teamB":"Na Uy"},"19":{"sA":3,"sB":0,"teamA":"Argentina","teamB":"Algeria"},"20":{"sA":2,"sB":1,"teamA":"Áo","teamB":"Jordan"},"21":{"sA":2,"sB":1,"teamA":"Ghana","teamB":"Panama"},"22":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Croatia"},"23":{"sA":2,"sB":0,"teamA":"Bồ Đào Nha","teamB":"Congo"},"24":{"sA":1,"sB":2,"teamA":"Uzbekistan","teamB":"Colombia"},"25":{"sA":2,"sB":0,"teamA":"CH Séc","teamB":"Nam Phi"},"26":{"sA":2,"sB":1,"teamA":"Thụy Sĩ","teamB":"Bosnia/Herzeg."},"27":{"sA":2,"sB":0,"teamA":"Canada","teamB":"Qatar"},"28":{"sA":1,"sB":1,"teamA":"Mexico","teamB":"Hàn Quốc"},"29":{"sA":3,"sB":0,"teamA":"Brazil","teamB":"Haiti"},"30":{"sA":1,"sB":2,"teamA":"Scotland","teamB":"Ma Rốc"},"31":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Paraguay"},"32":{"sA":2,"sB":0,"teamA":"Mỹ","teamB":"Australia"},"33":{"sA":3,"sB":0,"teamA":"Đức","teamB":"Ivory Coast"},"34":{"sA":2,"sB":0,"teamA":"Ecuador","teamB":"Curacao"},"35":{"sA":2,"sB":1,"teamA":"Hà Lan","teamB":"Thụy Điển"},"36":{"sA":1,"sB":2,"teamA":"Tunisia","teamB":"Nhật Bản"},"37":{"sA":2,"sB":0,"teamA":"Uruguay","teamB":"Cape Verde"},"38":{"sA":3,"sB":0,"teamA":"Tây Ban Nha","teamB":"Ả Rập Xê Út"},"39":{"sA":3,"sB":0,"teamA":"Bỉ","teamB":"Iran"},"40":{"sA":1,"sB":2,"teamA":"New Zealand","teamB":"Ai Cập"},"41":{"sA":1,"sB":1,"teamA":"Na Uy","teamB":"Senegal"},"42":{"sA":3,"sB":0,"teamA":"Pháp","teamB":"Iraq"},"43":{"sA":2,"sB":0,"teamA":"Argentina","teamB":"Áo"},"44":{"sA":1,"sB":1,"teamA":"Jordan","teamB":"Algeria"},"45":{"sA":2,"sB":1,"teamA":"Anh","teamB":"Ghana"},"46":{"sA":1,"sB":2,"teamA":"Panama","teamB":"Croatia"},"47":{"sA":3,"sB":1,"teamA":"Bồ Đào Nha","teamB":"Uzbekistan"},"48":{"sA":2,"sB":0,"teamA":"Colombia","teamB":"Congo"},"49":{"sA":0,"sB":3,"teamA":"Scotland","teamB":"Brazil"},"50":{"sA":2,"sB":0,"teamA":"Ma Rốc","teamB":"Haiti"},"51":{"sA":1,"sB":1,"teamA":"Thụy Sĩ","teamB":"Canada"},"52":{"sA":1,"sB":1,"teamA":"Bosnia/Herzeg.","teamB":"Qatar"},"53":{"sA":1,"sB":1,"teamA":"CH Séc","teamB":"Mexico"},"54":{"sA":1,"sB":2,"teamA":"Nam Phi","teamB":"Hàn Quốc"},"55":{"sA":2,"sB":1,"teamA":"Curacao","teamB":"Ivory Coast"},"56":{"sA":0,"sB":2,"teamA":"Ecuador","teamB":"Đức"},"57":{"sA":2,"sB":1,"teamA":"Nhật Bản","teamB":"Thụy Điển"},"58":{"sA":0,"sB":2,"teamA":"Tunisia","teamB":"Hà Lan"},"59":{"sA":1,"sB":2,"teamA":"Thổ Nhĩ Kỳ","teamB":"Mỹ"},"60":{"sA":2,"sB":0,"teamA":"Paraguay","teamB":"Australia"},"61":{"sA":0,"sB":2,"teamA":"Na Uy","teamB":"Pháp"},"62":{"sA":2,"sB":0,"teamA":"Senegal","teamB":"Iraq"},"63":{"sA":2,"sB":0,"teamA":"Ai Cập","teamB":"Iran"},"64":{"sA":0,"sB":2,"teamA":"New Zealand","teamB":"Bỉ"},"65":{"sA":0,"sB":1,"teamA":"Cape Verde","teamB":"Ả Rập Xê Út"},"66":{"sA":1,"sB":3,"teamA":"Uruguay","teamB":"Tây Ban Nha"},"67":{"sA":0,"sB":2,"teamA":"Panama","teamB":"Anh"},"68":{"sA":2,"sB":1,"teamA":"Croatia","teamB":"Ghana"},"69":{"sA":0,"sB":1,"teamA":"Algeria","teamB":"Áo"},"70":{"sA":0,"sB":2,"teamA":"Jordan","teamB":"Argentina"},"71":{"sA":1,"sB":2,"teamA":"Colombia","teamB":"Bồ Đào Nha"},"72":{"sA":0,"sB":1,"teamA":"Congo","teamB":"Uzbekistan"}},"finalist1":"Tây Ban Nha","finalist2":"Brazil","champion":"Tây Ban Nha"}};
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const state = {
+  results: {},   // {tt: {sA, sB}}
+  final: {rf1:'', rf2:'', rc:''},
+  lb: [],
+  barChart: null,
+  pieChart: null,
+};
+
+// ══════════════════════════════════════════
+// MATCH LIST (from first player)
+// ══════════════════════════════════════════
+const firstPlayer = Object.values(PLAYERS_DATA)[0];
+const MATCHES = Object.entries(firstPlayer.predictions)
+  .map(([tt, p]) => ({tt: parseInt(tt), teamA: p.teamA, teamB: p.teamB}))
+  .sort((a,b) => a.tt - b.tt);
+
+// Assign group letters: 72 matches / 9 groups of 8 = bảng A..I
+function getGroup(tt) {
+  const g = Math.ceil(tt / 8);
+  return String.fromCharCode(64 + Math.min(g, 9));
+}
+
+// ══════════════════════════════════════════
+// SCORING
+// ══════════════════════════════════════════
+function calcPts(pred, actual) {
+  // Chưa có kết quả
+  if (!actual || actual.sA === null || actual.sB === null) return null;
+
+  // Không đoán
+  if (!pred || pred.sA === null || pred.sB === null) return 0;
+
+  const pA = pred.sA, pB = pred.sB;
+  const rA = actual.sA, rB = actual.sB;
+
+  // 1. Đúng tỷ số
+  if (pA === rA && pB === rB) {
+    return 1;
+  }
+
+  // 2. Xác định thắng / hòa / thua
+  const predResult =
+    pA > pB ? 'win' :
+    pA < pB ? 'lose' : 'draw';
+
+  const realResult =
+    rA > rB ? 'win' :
+    rA < rB ? 'lose' : 'draw';
+
+  // 2. Đúng kết quả nhưng sai tỷ số
+  if (predResult === realResult) {
+    return -2;
+  }
+
+  // 3. Sai hoàn toàn
+  return -4;
+}
+
+function calcBonus(player) {
+  const fd = state.final;
+  if (!fd.rf1 && !fd.rf2 && !fd.rc) return {pts:0, details:[]};
+  let pts=0, details=[];
+  const norm = s => (s||'').trim().toLowerCase().replace(/\s+/g,' ');
+  const realF = [norm(fd.rf1), norm(fd.rf2)].filter(Boolean);
+  const pf1 = norm(player.finalist1), pf2 = norm(player.finalist2);
+  const pc = norm(player.champion), rc = norm(fd.rc);
+
+  if (realF.length > 0) {
+    let match = 0;
+    if (pf1 && realF.includes(pf1)) match++;
+    if (pf2 && realF.includes(pf2)) match++;
+    if (match===2) { pts+=10; details.push({l:'Đúng cả 2 finalist',p:10}); }
+    else if (match===1) { pts+=5; details.push({l:'Đúng 1 finalist',p:5}); }
+    else { pts-=5; details.push({l:'Sai cả 2 finalist',p:-5}); }
+  }
+
+  if (rc) {
+    if (pc===rc) { pts+=10; details.push({l:'Đúng vô địch',p:10}); }
+    else if (realF.includes(pc)) { pts-=3; details.push({l:'Sai VĐ (đội vào CK)',p:-3}); }
+    else { pts-=5; details.push({l:'Sai VĐ (đội không vào CK)',p:-5}); }
+  }
+  return {pts, details};
+}
+
+// ══════════════════════════════════════════
+// CALCULATE
+// ══════════════════════════════════════════
+function calculate() {
+  state.lb = Object.entries(PLAYERS_DATA).map(([name, player]) => {
+    let total=0, correct=0, exactScore=0, wrong=0, played=0;
+    const perMatch = {};
+
+    MATCHES.forEach(m => {
+      const actual = state.results[m.tt];
+      if (!actual) return;
+      played++;
+      const pred = player.predictions[m.tt];
+      const pts = calcPts(pred, actual);
+      if (pts === null) return;
+      total += pts;
+      perMatch[m.tt] = pts;
+      const pA=pred?.sA, pB=pred?.sB, rA=actual.sA, rB=actual.sB;
+      if (pA===rA && pB===rB) { exactScore++; correct++; }
+      else if ((pA>pB&&rA>rB)||(pA<pB&&rA<rB)||(pA===pB&&rA===rB)) correct++;
+      else wrong++;
+    });
+
+    const {pts: bonus, details: bonusDetails} = calcBonus(player);
+    total += bonus;
+
+    return {name, total, correct, exactScore, wrong, played, bonus, bonusDetails,
+      perMatch, finalist1: player.finalist1, finalist2: player.finalist2, champion: player.champion};
+  });
+  state.lb.sort((a,b) => b.total - a.total);
+  renderDashboard();
+  renderPlayerCards();
+}
+
+// ══════════════════════════════════════════
+// RENDER DASHBOARD
+// ══════════════════════════════════════════
+function renderDashboard() {
+  const played = Object.keys(state.results).length;
+  document.getElementById('sMt').textContent = played;
+
+  if (!state.lb.length || played === 0) {
+    document.getElementById('sBest').textContent = '—';
+    document.getElementById('sMoney').textContent = '—';
+    document.getElementById('lbBody').innerHTML = `<div class="empty"><div class="eico">📋</div><h3>Chưa có kết quả</h3><p>Vào tab "Nhập Kết Quả" để bắt đầu tính điểm</p></div>`;
+    document.getElementById('banner').classList.remove('show');
+    updateCharts([],[]);
+    return;
+  }
+
+  const lb = state.lb;
+  const leader = lb[0];
+  document.getElementById('sBest').textContent = (leader.total>=0?'+':'')+leader.total+'đ';
+  document.getElementById('sMoney').textContent = (leader.total*3>=0?'+':'')+(leader.total*3)+'k';
+
+  const rankCls = {1:'top1',2:'top2',3:'top3'};
+  document.getElementById('lbBody').innerHTML = lb.map((p,i) => {
+    const rank=i+1, rc=rankCls[rank]||'';
+    const rk=rank<=3?'r'+rank:'';
+    const init=p.name.split(' ').slice(-2).map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+    const sc=p.total>0?'pos':p.total<0?'neg':'zer';
+    const money=p.total*3;
+    const acc=p.played>0?Math.round(p.correct/p.played*100):0;
+    const bn=p.bonus;
+    return `<div class="lb-row ${rc}" onclick="openModal('${p.name.replace(/'/g,"\\'")}')">
+      <div><span class="rnk ${rk}">${rank<=3?['🥇','🥈','🥉'][i]:rank}</span></div>
+      <div class="pinfo">
+        <div class="ava">${init}</div>
+        <div><div class="pname">${p.name}</div>
+        <div class="psub">VĐ: ${p.champion||'?'} · ${acc}% đúng</div></div>
+      </div>
+      <div class="lscore ${sc}">${p.total>=0?'+':''}${p.total}</div>
+      <div class="lcell pos">${p.correct}</div>
+      <div class="lcell" style="color:var(--gold)">${p.exactScore}</div>
+      <div class="lcell neg">${p.wrong}</div>
+      <div class="lbonus ${bn>0?'pos':bn<0?'neg':'zer'}">${bn!==0?(bn>0?'+':'')+bn+'đ':'—'}</div>
+      <div class="lcell" style="color:${money>=0?'var(--gl)':'#f87171'}">${money>=0?'+':''}${money}k</div>
+    </div>`;
+  }).join('');
+
+  // Banner
+  const banner = document.getElementById('banner');
+  banner.classList.add('show');
+  const worst = [...lb].sort((a,b)=>a.total-b.total)[0];
+  const mostW = [...lb].sort((a,b)=>b.wrong-a.wrong)[0];
+  const mostE = [...lb].sort((a,b)=>b.exactScore-a.exactScore)[0];
+  const sec = lb[1];
+  document.getElementById('banIcon').textContent = '🎉';
+  document.getElementById('banTitle').textContent = `🏆 ${leader.name} đang dẫn đầu!`;
+  document.getElementById('banBody').textContent = `Cập nhật sau ${played} trận đấu vòng bảng. Bảng xếp hạng mới nhất!`;
+  const chips = [
+    `🥇 <strong>${leader.name}</strong> dẫn đầu <strong>${leader.total>=0?'+':''}${leader.total}đ</strong> (${leader.total*3>=0?'+':''}${leader.total*3}k)`,
+    sec ? `🥈 <strong>${sec.name}</strong> bám sát với <strong>${sec.total>=0?'+':''}${sec.total}đ</strong>` : null,
+    mostE.exactScore>0 ? `🎯 <strong>${mostE.name}</strong> đoán đúng tỷ số nhiều nhất: <strong>${mostE.exactScore} trận</strong>` : null,
+    mostW.wrong>0 ? `❌ <strong>${mostW.name}</strong> đoán sai nhiều nhất: <strong>${mostW.wrong} trận</strong>` : null,
+    lb.length>1 ? `😅 <strong>${worst.name}</strong> đang xếp cuối: <strong>${worst.total}đ</strong>` : null,
+  ].filter(Boolean);
+  document.getElementById('banChips').innerHTML = chips.map(c=>`<div class="chip">${c}</div>`).join('');
+
+  updateCharts(lb, lb);
+  renderRecent();
+}
+
+function updateCharts(lb) {
+  const ctx1 = document.getElementById('chartBar').getContext('2d');
+  if (state.barChart) state.barChart.destroy();
+  const show = lb.slice(0,20);
+  const colors = show.map((_,i)=>i===0?'#f0b429':i===1?'#9ca3af':i===2?'#cd7f32':'#25a855');
+  state.barChart = new Chart(ctx1, {
+    type:'bar',
+    data:{
+      labels: show.map(p => p.name.split(' ').pop()),
+      datasets:[{label:'Điểm', data:show.map(p=>p.total), backgroundColor:colors, borderRadius:4, borderSkipped:false}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#86efac',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}},
+        y:{ticks:{color:'#86efac',font:{size:10}},grid:{color:'rgba(255,255,255,.08)'}}
+      }}
+  });
+
+  const ctx2 = document.getElementById('chartPie').getContext('2d');
+  if (state.pieChart) state.pieChart.destroy();
+  if (lb.length) {
+    const te=lb.reduce((s,p)=>s+p.exactScore,0);
+    const tc=lb.reduce((s,p)=>s+p.correct,0)-te;
+    const tw=lb.reduce((s,p)=>s+p.wrong,0);
+    state.pieChart = new Chart(ctx2, {
+      type:'doughnut',
+      data:{labels:['Đúng tỷ số','Đúng đội','Sai'],
+        datasets:[{data:[te,tc,tw],backgroundColor:['#f0b429','#25a855','#dc2626'],borderWidth:0,hoverOffset:4}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{color:'#86efac',font:{size:11},padding:10,boxWidth:11}}},
+        cutout:'60%'}
+    });
+  }
+}
+
+function renderRecent() {
+  const panel=document.getElementById('recentPanel');
+  const list=document.getElementById('recentList');
+  const recent=Object.entries(state.results).slice(-8).reverse();
+  if(!recent.length){panel.style.display='none';return;}
+  panel.style.display='block';
+  list.innerHTML=recent.map(([tt,res])=>{
+    const m=MATCHES.find(m=>m.tt==tt);
+    if(!m)return'';
+    return `<div class="mrow">
+      <div class="mnum">${tt}</div>
+      <div class="mteams"><strong>${m.teamA}</strong> vs <strong>${m.teamB}</strong></div>
+      <div class="mscore">${res.sA}:${res.sB}</div>
+      <span class="mtag">Bảng ${getGroup(parseInt(tt))}</span>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// RENDER MATCHES TABLE
+// ══════════════════════════════════════════
+let rFilter='all';
+function renderMatches() {
+  const tbody = document.getElementById('mTbody');
+  const filtered = rFilter==='all' ? MATCHES : MATCHES.filter(m=>getGroup(m.tt)===rFilter);
+  tbody.innerHTML = filtered.map(m => {
+    const res=state.results[m.tt]||{};
+    const has=res.sA!==undefined && res.sA!==null;
+    return `<tr>
+      <td style="text-align:center;color:var(--tx3);font-weight:600">${m.tt}</td>
+      <td class="tname tr">${m.teamA}</td>
+      <td colspan="3">
+        <div class="sinputs">
+          <input type="number" class="sin" min="0" max="20" id="sA${m.tt}" value="${has?res.sA:''}" placeholder="—" oninput="tSave(${m.tt})">
+          <span class="ssep">:</span>
+          <input type="number" class="sin" min="0" max="20" id="sB${m.tt}" value="${has?res.sB:''}" placeholder="—" oninput="tSave(${m.tt})">
+        </div>
+      </td>
+      <td class="tname tl">${m.teamB}</td>
+      <td style="text-align:center"><span class="rtag">Bảng ${getGroup(m.tt)}</span></td>
+      <td style="text-align:center"><span class="sbadge ${has?'sdone':'spending'}">${has?'✓ Đã có':'⏳ Chờ'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterR(r, btn) {
+  rFilter = r;
+  document.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMatches();
+}
+
+function tSave(tt) {
+  const a=document.getElementById('sA'+tt)?.value;
+  const b=document.getElementById('sB'+tt)?.value;
+  if(a!=='' && b!=='') state.results[tt]={sA:parseInt(a),sB:parseInt(b)};
+}
+
+function saveFinal() {
+  state.final.rf1=document.getElementById('rf1').value;
+  state.final.rf2=document.getElementById('rf2').value;
+  state.final.rc=document.getElementById('rc').value;
+}
+
+function saveAndCalc() {
+  MATCHES.forEach(m=>{
+    const a=document.getElementById('sA'+m.tt)?.value;
+    const b=document.getElementById('sB'+m.tt)?.value;
+    if(a!==''&&a!=null&&b!==''&&b!=null) state.results[m.tt]={sA:parseInt(a),sB:parseInt(b)};
+  });
+  saveFinal();
+  calculate();
+  renderMatches();
+  showToast('✅ Đã lưu & tính điểm xong!');
+  switchTab('dashboard', document.querySelector('.nbtn'));
+}
+
+// ══════════════════════════════════════════
+// PLAYER CARDS
+// ══════════════════════════════════════════
+function renderPlayerCards() {
+  const container = document.getElementById('playerCards');
+  const sorted = state.lb.length ? state.lb : Object.entries(PLAYERS_DATA).map(([name,p])=>({
+    name, total:0, correct:0, exactScore:0, wrong:0, played:0, bonus:0,
+    finalist1:p.finalist1, finalist2:p.finalist2, champion:p.champion, perMatch:{}
+  }));
+
+  container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">` +
+    sorted.map((p,i) => {
+      const init=p.name.split(' ').slice(-2).map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+      const rank=i+1;
+      return `<div onclick="openModal('${p.name.replace(/'/g,"\\'")}')
+" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;" onmouseover="this.style.borderColor='var(--bdr2)'" onmouseout="this.style.borderColor='var(--bdr)'">
+        <div style="font-size:18px;">${rank<=3?['🥇','🥈','🥉'][i]:'#'+rank}</div>
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--gold);flex-shrink:0">${init}</div>
+        <div>
+          <div style="font-weight:600;font-size:13px;color:var(--tx)">${p.name}</div>
+          <div style="font-size:11px;color:var(--tx2)">VĐ: ${p.champion||'?'}</div>
+          <div style="font-size:11px;color:var(--tx3)">${p.finalist1||'?'} & ${p.finalist2||'?'}</div>
+        </div>
+        <div style="margin-left:auto;font-size:18px;font-weight:800;${p.total>0?'color:var(--gl)':p.total<0?'color:#f87171':'color:var(--tx3)'}">${p.total>0?'+':''}${p.total}</div>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+// ══════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════
+function openModal(name) {
+  const player = PLAYERS_DATA[name];
+  if (!player) return;
+  const lb = state.lb.find(p=>p.name===name) || {total:0,correct:0,exactScore:0,wrong:0,played:0,bonus:0,bonusDetails:[],perMatch:{}};
+
+  document.getElementById('modalTitle').textContent = '📋 ' + name;
+  document.getElementById('modalStats').innerHTML = `
+    <div class="mstat"><div class="mv ${lb.total>0?'pos':lb.total<0?'neg':'zer'}">${lb.total>=0?'+':''}${lb.total}đ</div><div class="ml">Tổng điểm</div></div>
+    <div class="mstat"><div class="mv pos">${lb.correct}</div><div class="ml">Đúng đội</div></div>
+    <div class="mstat"><div class="mv" style="color:var(--gold)">${lb.exactScore}</div><div class="ml">Đúng tỷ số</div></div>
+    <div class="mstat"><div class="mv neg">${lb.wrong}</div><div class="ml">Sai đội</div></div>
+  `;
+
+  const preds = document.getElementById('modalPreds');
+  let html = `<div style="font-size:11px;color:var(--tx2);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
+    <span style="color:var(--gold)">VĐ: ${player.champion||'?'}</span> · CK: ${player.finalist1||'?'} &amp; ${player.finalist2||'?'}
+    ${lb.bonus!==0?`· Thưởng CK: <span style="color:${lb.bonus>0?'var(--gl)':'#f87171'}">${lb.bonus>0?'+':''}${lb.bonus}đ</span>`:''}
+  </div>`;
+
+  html += `<div style="font-size:11px;color:var(--tx2);margin-bottom:8px;display:grid;grid-template-columns:30px 1fr 80px 1fr 50px;gap:6px;padding:4px 8px;font-weight:700;">
+    <span style="text-align:center">#</span><span>Đội nhà</span><span style="text-align:center">Dự đoán</span><span>Đội khách</span><span style="text-align:center">Điểm</span>
+  </div>`;
+
+  MATCHES.forEach(m => {
+    const pred = player.predictions[m.tt];
+    const actual = state.results[m.tt];
+    const pts = lb.perMatch[m.tt];
+    let cls='pending';
+    if(pts===0 && actual) cls='correct-exact';
+    else if(pts===-1) cls='correct-win';
+    else if(pts===-2) cls='wrong';
+    const predStr = (pred?.sA!==null&&pred?.sA!==undefined)?`${pred.sA}:${pred.sB}`:'?:?';
+    const actStr = actual?`${actual.sA}:${actual.sB}`:'';
+    const ptsStr = pts!==undefined?(pts>=0?'+':'')+pts+'đ':'';
+    const ptsColor = pts===0?'var(--gold)':pts===-1?'var(--gl)':pts===-2?'#f87171':'var(--tx2)';
+    html += `<div class="pred-row ${cls}">
+      <span class="pred-num">${m.tt}</span>
+      <span class="pred-team">${m.teamA}</span>
+      <span class="pred-score">${predStr}${actStr?`<br><small style="color:var(--gold)">${actStr}</small>`:''}</span>
+      <span class="pred-team">${m.teamB}</span>
+      <span class="pred-pts" style="color:${ptsColor}">${ptsStr}</span>
+    </div>`;
+  });
+
+  preds.innerHTML = html;
+  document.getElementById('modalBg').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(e) {
+  if(!e || e.target===document.getElementById('modalBg')) {
+    document.getElementById('modalBg').classList.remove('show');
+    document.body.style.overflow='';
+  }
+}
+// =======================
+// 🧩 DATA GỐC
+// =======================
+
+let matches = [
+  // ví dụ
+  // { teamA: "Hàn Quốc", teamB: "CH Séc", sA: null, sB: null }
 ];
 
-// ======================= MAP TÊN API -> TÊN TRONG FILE EXCEL =======================
-const TEAM_NAME_MAP = {
-  // Ánh xạ từ tên API (tiếng Đức/Anh) sang tên trong file Excel của bạn
+let players = [
+  // dữ liệu người chơi của bạn
+];
+
+// =======================
+// 🧠 TEAM NAME MAP
+// =======================
+
+const teamMap = {
   "Südkorea": "Hàn Quốc",
-  "Korea Republic": "Hàn Quốc",
+  "South Korea": "Hàn Quốc",
+
   "Tschechien": "CH Séc",
-  "Czech Republic": "CH Séc",
+  "Czechia": "CH Séc",
+
   "USA": "Mỹ",
   "United States": "Mỹ",
+
   "Kanada": "Canada",
-  "Bosnien-Herzegowina": "Bosnia/Herzeg.",
-  "Bosnia and Herzegovina": "Bosnia/Herzeg.",
-  "Paraguay": "Paraguay",
-  "Haiti": "Haiti",
-  "Schottland": "Scotland",
-  "Scotland": "Scotland",
-  "Australien": "Australia",
-  "Australia": "Australia",
-  "Türkei": "Thổ Nhĩ Kỳ",
-  "Turkey": "Thổ Nhĩ Kỳ",
-  "Brasilien": "Brazil",
-  "Brazil": "Brazil",
-  "Marokko": "Ma Rốc",
-  "Morocco": "Ma Rốc",
-  "Katar": "Qatar",
-  "Qatar": "Qatar",
-  "Schweiz": "Thụy Sĩ",
-  "Switzerland": "Thụy Sĩ",
-  "Elfenbeinküste": "Ivory Coast",
-  "Ivory Coast": "Ivory Coast",
-  "Ecuador": "Ecuador",
-  "Deutschland": "Đức",
-  "Germany": "Đức",
-  "Curaçao": "Curacao",
-  "Niederlande": "Hà Lan",
-  "Netherlands": "Hà Lan",
-  "Japan": "Nhật Bản",
-  "Schweden": "Thụy Điển",
-  "Sweden": "Thụy Điển",
-  "Tunesien": "Tunisia",
-  "Tunisia": "Tunisia",
-  "Saudi-Arabien": "Ả Rập Xê Út",
-  "Saudi Arabia": "Ả Rập Xê Út",
-  "Uruguay": "Uruguay",
-  "Spanien": "Tây Ban Nha",
-  "Spain": "Tây Ban Nha",
-  "Kap Verde": "Cape Verde",
-  "Cape Verde": "Cape Verde",
-  "Iran": "Iran",
-  "Neuseeland": "New Zealand",
-  "New Zealand": "New Zealand",
-  "Belgien": "Bỉ",
-  "Belgium": "Bỉ",
-  "Ägypten": "Ai Cập",
-  "Egypt": "Ai Cập",
-  "Irak": "Iraq",
-  "Iraq": "Iraq",
-  "Norwegen": "Na Uy",
-  "Norway": "Na Uy",
-  "Frankreich": "Pháp",
-  "France": "Pháp",
-  "Senegal": "Senegal",
-  "Argentinien": "Argentina",
-  "Argentina": "Argentina",
-  "Algerien": "Algeria",
-  "Algeria": "Algeria",
-  "Österreich": "Áo",
-  "Austria": "Áo",
-  "Jordanien": "Jordan",
-  "Jordan": "Jordan",
-  "England": "Anh",
-  "Kroatien": "Croatia",
-  "Croatia": "Croatia",
-  "Ghana": "Ghana",
-  "Panama": "Panama",
-  "Portugal": "Bồ Đào Nha",
-  "DR Kongo": "Congo",
-  "Congo": "Congo",
-  "Usbekistan": "Uzbekistan",
-  "Uzbekistan": "Uzbekistan",
-  "Kolumbien": "Colombia",
-  "Colombia": "Colombia",
-  "Mexiko": "Mexico",
-  "Mexico": "Mexico",
-  "Südafrika": "Nam Phi",
-  "South Africa": "Nam Phi"
+  "Canada": "Canada"
 };
 
-// Hàm chuyển đổi tên đội từ API sang tên trong file Excel
-function mapTeamName(apiName) {
-  if (!apiName) return "";
-  // Tìm trong map
-  for (const [api, local] of Object.entries(TEAM_NAME_MAP)) {
-    if (apiName.toLowerCase() === api.toLowerCase()) {
-      return local;
-    }
-  }
-  // Nếu không tìm thấy, giữ nguyên
-  return apiName;
+function normalizeTeam(name) {
+  return teamMap[name] || name;
 }
 
-// ======================= ĐỊNH NGHĨA 104 TRẬN =======================
-const MATCH_DEFINITIONS = [];
-const GROUP_STAGES = [
-  {tt:1, A:"Mexico",B:"Nam Phi"},{tt:2, A:"Hàn Quốc",B:"CH Séc"},{tt:3, A:"Canada",B:"Bosnia/Herzeg."},{tt:4, A:"Mỹ",B:"Paraguay"},{tt:5, A:"Haiti",B:"Scotland"},{tt:6, A:"Australia",B:"Thổ Nhĩ Kỳ"},{tt:7, A:"Brazil",B:"Ma Rốc"},{tt:8, A:"Qatar",B:"Thụy Sĩ"},{tt:9, A:"Ivory Coast",B:"Ecuador"},{tt:10, A:"Đức",B:"Curacao"},{tt:11, A:"Hà Lan",B:"Nhật Bản"},{tt:12, A:"Thụy Điển",B:"Tunisia"},{tt:13, A:"Ả Rập Xê Út",B:"Uruguay"},{tt:14, A:"Tây Ban Nha",B:"Cape Verde"},{tt:15, A:"Iran",B:"New Zealand"},{tt:16, A:"Bỉ",B:"Ai Cập"},{tt:17, A:"Na Uy",B:"Iraq"},{tt:18, A:"Pháp",B:"Senegal"},{tt:19, A:"Croatia",B:"Algeria"},{tt:20, A:"Argentina",B:"Jordan"},{tt:21, A:"Áo",B:"Ghana"},{tt:22, A:"Anh",B:"Panama"},{tt:23, A:"Uzbekistan",B:"Congo"},{tt:24, A:"Bồ Đào Nha",B:"Colombia"},{tt:25, A:"Mexico",B:"CH Séc"},{tt:26, A:"Nam Phi",B:"Hàn Quốc"},{tt:27, A:"Canada",B:"Paraguay"},{tt:28, A:"Bosnia/Herzeg.",B:"Mỹ"},{tt:29, A:"Brazil",B:"Haiti"},{tt:30, A:"Scotland",B:"Ma Rốc"},{tt:31, A:"Thổ Nhĩ Kỳ",B:"Paraguay"},{tt:32, A:"Mỹ",B:"Australia"},{tt:33, A:"Đức",B:"Ivory Coast"},{tt:34, A:"Ecuador",B:"Curacao"},{tt:35, A:"Hà Lan",B:"Thụy Điển"},{tt:36, A:"Tunisia",B:"Nhật Bản"},{tt:37, A:"Uruguay",B:"Cape Verde"},{tt:38, A:"Tây Ban Nha",B:"Ả Rập Xê Út"},{tt:39, A:"Bỉ",B:"Iran"},{tt:40, A:"New Zealand",B:"Ai Cập"},{tt:41, A:"Na Uy",B:"Senegal"},{tt:42, A:"Pháp",B:"Iraq"},{tt:43, A:"Argentina",B:"Áo"},{tt:44, A:"Jordan",B:"Algeria"},{tt:45, A:"Anh",B:"Ghana"},{tt:46, A:"Panama",B:"Croatia"},{tt:47, A:"Bồ Đào Nha",B:"Uzbekistan"},{tt:48, A:"Colombia",B:"Congo"},{tt:49, A:"Scotland",B:"Brazil"},{tt:50, A:"Ma Rốc",B:"Haiti"},{tt:51, A:"Thụy Sĩ",B:"Canada"},{tt:52, A:"Qatar",B:"Bosnia/Herzeg."},{tt:53, A:"Mexico",B:"Hàn Quốc"},{tt:54, A:"CH Séc",B:"Nam Phi"},{tt:55, A:"Đức",B:"Ecuador"},{tt:56, A:"Curacao",B:"Ivory Coast"},{tt:57, A:"Thụy Sĩ",B:"Bosnia/Herzeg."},{tt:58, A:"Canada",B:"Qatar"},{tt:59, A:"Hà Lan",B:"Tunisia"},{tt:60, A:"Nhật Bản",B:"Thụy Điển"},{tt:61, A:"Tây Ban Nha",B:"Uruguay"},{tt:62, A:"Cape Verde",B:"Ả Rập Xê Út"},{tt:63, A:"Bỉ",B:"New Zealand"},{tt:64, A:"Ai Cập",B:"Iran"},{tt:65, A:"Na Uy",B:"Pháp"},{tt:66, A:"Iraq",B:"Senegal"},{tt:67, A:"Argentina",B:"Ghana"},{tt:68, A:"Áo",B:"Jordan"},{tt:69, A:"Anh",B:"Croatia"},{tt:70, A:"Algeria",B:"Panama"},{tt:71, A:"Bồ Đào Nha",B:"Congo"},{tt:72, A:"Uzbekistan",B:"Colombia"}
-];
-for(let i=1;i<=72;i++) MATCH_DEFINITIONS.push({ tt:i, teamA:"", teamB:"", round:"Vòng Bảng" });
-GROUP_STAGES.forEach(m => { const match = MATCH_DEFINITIONS.find(x=>x.tt===m.tt); if(match){ match.teamA=m.A; match.teamB=m.B; } });
-for(let i=73;i<=104;i++) MATCH_DEFINITIONS.push({ tt:i, teamA:`Đội K${i}`, teamB:`Đội K${i+1}`, round:i<=88?"Vòng 1/32":i<=96?"Vòng 1/16":i<=100?"Tứ Kết":i<=102?"Bán Kết":i===103?"Tranh Hạng 3":"Chung Kết" });
+// =======================
+// ⚽ CALC POINTS (NEW RULE)
+// =======================
 
-let state = { players: {}, results: {}, autoLocked: new Set(), finalData: { realFinalist1: "", realFinalist2: "", realChampion: "" } };
+function calcPts(pred, actual) {
+  if (!actual || actual.sA === null || actual.sB === null) return null;
+  if (!pred || pred.sA === null || pred.sB === null) return 0;
 
-// ======================= DỰ ĐOÁN GỐC =======================
-function buildEmbeddedPlayerData() {
-  let players = {};
-  PLAYER_NAMES.forEach(name => {
-    let preds = {};
-    for(let i=1;i<=104;i++) {
-      let sa=2, sb=1;
-      if(i%4===0) { sa=2; sb=0; } else if(i%5===0) { sa=0; sb=2; } else if(i%7===0) { sa=3; sb=1; }
-      if(name === "Trần Thế Anh") { sa += 1; }
-      if(name === "Phạm Văn Dần") { sa = 2; sb = 0; }
-      preds[i] = { sA: sa, sB: sb };
-    }
-    players[name] = { name, predictions: preds, bonus: { finalist1: "", finalist2: "", champion: "" }, totalPoints:0, groupPoints:0, koPoints:0, exactScoresVB:0, exactResultsVB:0, bonusPoints:0 };
+  const pA = pred.sA, pB = pred.sB;
+  const rA = actual.sA, rB = actual.sB;
+
+  // ✅ 1. Đúng tỷ số
+  if (pA === rA && pB === rB) return 1;
+
+  // xác định kết quả
+  const predResult =
+    pA > pB ? 'win' :
+    pA < pB ? 'lose' : 'draw';
+
+  const realResult =
+    rA > rB ? 'win' :
+    rA < rB ? 'lose' : 'draw';
+
+  // ✅ 2. Đúng kết quả
+  if (predResult === realResult) return -2;
+
+  // ❌ 3. Sai hoàn toàn
+  return -4;
+}
+
+// =======================
+// 🧮 CALCULATE TOTAL
+// =======================
+
+function calculate() {
+  players.forEach(player => {
+    let total = 0;
+
+    matches.forEach((match, idx) => {
+      const pred = player.preds[idx];
+      const pts = calcPts(pred, match);
+
+      if (pts !== null) total += pts;
+    });
+
+    player.total = total;
   });
 
-  // Bonus theo 28 file Excel
-  players["Nguyễn Anh Tuấn"] && (players["Nguyễn Anh Tuấn"].bonus = { finalist1: "Brazil", finalist2: "Anh", champion: "Anh" });
-  players["Trần Thế Anh"] && (players["Trần Thế Anh"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Brazil", champion: "Tây Ban Nha" });
-  players["Phạm Văn Dần"] && (players["Phạm Văn Dần"].bonus = { finalist1: "Brazil", finalist2: "Anh", champion: "Anh" });
-  players["Dương Đăng Tiến"] && (players["Dương Đăng Tiến"].bonus = { finalist1: "Brazil", finalist2: "Anh", champion: "Anh" });
-  players["Đinh Anh Dũng"] && (players["Đinh Anh Dũng"].bonus = { finalist1: "Bồ Đào Nha", finalist2: "Đức", champion: "Đức" });
-  players["Trần Xuân Đồng"] && (players["Trần Xuân Đồng"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Brazil", champion: "Brazil" });
-  players["Trần Xuân Đức"] && (players["Trần Xuân Đức"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Brazil", champion: "Tây Ban Nha" });
-  players["Nguyễn Tiến Giáp"] && (players["Nguyễn Tiến Giáp"].bonus = { finalist1: "Pháp", finalist2: "Tây Ban Nha", champion: "Pháp" });
-  players["Nguyễn Văn Hải"] && (players["Nguyễn Văn Hải"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Argentina", champion: "Argentina" });
-  players["Phạm Bá Hạnh"] && (players["Phạm Bá Hạnh"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Pháp", champion: "Tây Ban Nha" });
-  players["Nguyễn Trọng Hiệp"] && (players["Nguyễn Trọng Hiệp"].bonus = { finalist1: "Brazil", finalist2: "Anh", champion: "Brazil" });
-  players["Nguyễn Huy Hữu"] && (players["Nguyễn Huy Hữu"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Brazil", champion: "Brazil" });
-  players["Nguyễn Đăng Kiên"] && (players["Nguyễn Đăng Kiên"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Pháp", champion: "Tây Ban Nha" });
-  players["Lê Đình Long"] && (players["Lê Đình Long"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Pháp", champion: "Tây Ban Nha" });
-  players["Nguyễn Thành Luân"] && (players["Nguyễn Thành Luân"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Brazil", champion: "Brazil" });
-  players["Nguyễn Xuân Minh"] && (players["Nguyễn Xuân Minh"].bonus = { finalist1: "Đức", finalist2: "Brazil", champion: "Đức" });
-  players["Bùi Công Nguyên"] && (players["Bùi Công Nguyên"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Brazil", champion: "Tây Ban Nha" });
-  players["Vi Văn Nhàn"] && (players["Vi Văn Nhàn"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Anh", champion: "Tây Ban Nha" });
-  players["Nguyễn Quốc Trung"] && (players["Nguyễn Quốc Trung"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Pháp", champion: "Pháp" });
-  players["Phan Thế Hùng"] && (players["Phan Thế Hùng"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Pháp", champion: "Pháp" });
-  players["Trương Văn Thành"] && (players["Trương Văn Thành"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Brazil", champion: "Brazil" });
-  players["Nguyễn Huy Thủy"] && (players["Nguyễn Huy Thủy"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Brazil", champion: "Tây Ban Nha" });
-  players["Nguyễn Hữu Tiến"] && (players["Nguyễn Hữu Tiến"].bonus = { finalist1: "Anh", finalist2: "Pháp", champion: "Anh" });
-  players["Thái Văn Tráng"] && (players["Thái Văn Tráng"].bonus = { finalist1: "Pháp", finalist2: "Tây Ban Nha", champion: "Pháp" });
-  players["Đậu Xuân Trung"] && (players["Đậu Xuân Trung"].bonus = { finalist1: "Anh", finalist2: "Tây Ban Nha", champion: "Anh" });
-  players["Đào Duy Tùng"] && (players["Đào Duy Tùng"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Pháp", champion: "Pháp" });
-  players["Nguyễn Quang Vinh"] && (players["Nguyễn Quang Vinh"].bonus = { finalist1: "Bồ Đào Nha", finalist2: "Đức", champion: "Đức" });
-  players["Nguyễn Tiến Vũ"] && (players["Nguyễn Tiến Vũ"].bonus = { finalist1: "Tây Ban Nha", finalist2: "Pháp", champion: "Pháp" });
+  console.log("✅ Recalculated ranking");
 
-  return players;
+  // 🔥 THÊM 3 DÒNG NÀY
+  renderScoreChart();
+  renderStatsChart();
 }
 
-// ======================= API KẾT QUẢ THẬT =======================
-async function fetchRealResults(manual=false) {
-  const statusSpan = document.getElementById('api-status-text');
-  if(statusSpan){ statusSpan.textContent="Đang đồng bộ..."; statusSpan.className="api-badge loading"; }
+// =======================
+// 🔄 UPDATE MATCH RESULT
+// =======================
+
+function updateMatchResult(teamA, teamB, sA, sB) {
+  const matchIndex = matches.findIndex(m =>
+    (m.teamA === teamA && m.teamB === teamB) ||
+    (m.teamA === teamB && m.teamB === teamA)
+  );
+
+  if (matchIndex === -1) {
+    console.warn("❌ Không tìm thấy trận:", teamA, teamB);
+    return;
+  }
+
+  const match = matches[matchIndex];
+
+  // tránh update lại
+  if (match.sA !== null && match.sB !== null) return;
+
+  match.sA = sA;
+  match.sB = sB;
+
+  console.log(`🔥 Updated: ${teamA} ${sA}-${sB} ${teamB}`);
+
+  // 🧮 tính lại điểm
+  calculate();
+
+  // 🎉 THÔNG BÁO SAU TRẬN (MỚI)
+  if (typeof notifyAfterMatch === "function") {
+    notifyAfterMatch(matchIndex);
+  }
+}
+
+// =======================
+// 🌍 AUTO UPDATE WORLD CUP
+// =======================
+
+async function autoUpdateResults() {
   try {
-    const response = await fetch('https://api.openligadb.de/getmatchdata/wm2026');
-    if(!response.ok) throw new Error('Không thể kết nối API');
-    const data = await response.json();
-    let updated=0;
-    
-    data.forEach(apiMatch => {
-      // Chuyển đổi tên đội từ API sang tên trong file Excel
-      const apiTeamA = mapTeamName(apiMatch.team1?.teamName);
-      const apiTeamB = mapTeamName(apiMatch.team2?.teamName);
-      
-      // Tìm trận đấu khớp trong hệ thống
-      const matchObj = MATCH_DEFINITIONS.find(m => 
-        m.teamA === apiTeamA && m.teamB === apiTeamB
-      );
-      
-      if(matchObj && apiMatch.matchIsFinished){
-        const result = apiMatch.matchResults?.find(r=>r.resultTypeID===2); // Endergebnis
-        if(result){
-          state.results[matchObj.tt] = { sA: result.pointsTeam1, sB: result.pointsTeam2 };
-          state.autoLocked.add(matchObj.tt);
-          updated++;
-          console.log(`Đã cập nhật: ${matchObj.tt} - ${apiTeamA} ${result.pointsTeam1}:${result.pointsTeam2} ${apiTeamB}`);
-        }
+    const res = await fetch("https://api-football-v1.p.rapidapi.com/v3/fixtures?league=1&season=2026", {
+      headers: {
+        "X-RapidAPI-Key": "YOUR_KEY"
       }
     });
-    
-    if(statusSpan){ statusSpan.textContent=`Đồng bộ thành công (+${updated} trận)`; statusSpan.className="api-badge success"; }
-    document.getElementById('api-time-text').innerText = "Cập nhật: "+new Date().toLocaleTimeString('vi-VN');
-    if(manual) showToast(`Đã đồng bộ ${updated} trận từ API World Cup 2026`);
-    persistState();
-    recalculateAll();
-    renderRealMatchesGrid();
-  } catch(err){
-    console.error(err);
-    if(statusSpan){ statusSpan.textContent="Chế độ ngoại tuyến"; statusSpan.className="api-badge error"; }
-    if(manual) showToast("Không lấy được dữ liệu trực tuyến, đang dùng kết quả lưu tạm", "error");
+
+    const data = await res.json();
+
+    data.response.forEach(match => {
+      const status = match.fixture.status.short;
+
+      // 🔥 CHỈ lấy kết quả sau 90 phút
+      if (status !== "FT") return;
+
+      const teamA = normalizeTeam(match.teams.home.name);
+      const teamB = normalizeTeam(match.teams.away.name);
+
+      const sA = match.goals.home;
+      const sB = match.goals.away;
+
+      updateMatchResult(teamA, teamB, sA, sB);
+    });
+
+  } catch (err) {
+    console.error("❌ Auto update error:", err);
   }
 }
 
-function calculateScores() {
-  Object.values(state.players).forEach(p => { p.totalPoints=0; p.groupPoints=0; p.koPoints=0; p.exactScoresVB=0; p.exactResultsVB=0; p.bonusPoints=0; });
-  Object.entries(state.results).forEach(([ttStr, res]) => {
-    const tt=parseInt(ttStr), match=MATCH_DEFINITIONS.find(m=>m.tt===tt);
-    if(!match) return;
-    const isVB = tt<=72, realSign = Math.sign(res.sA - res.sB);
-    Object.values(state.players).forEach(p => {
-      const pred = p.predictions[tt];
-      if(!pred) return;
-      const predSign = Math.sign(pred.sA - pred.sB);
-      let pts = 0;
-      if(isVB){
-        if(pred.sA===res.sA && pred.sB===res.sB) { pts=0; p.exactScoresVB++; p.exactResultsVB++; }
-        else if(predSign===realSign) { pts=-1; p.exactResultsVB++; }
-        else pts=-2;
-        p.groupPoints += pts;
-      } else {
-        if(pred.sA===res.sA && pred.sB===res.sB) pts=1;
-        else if(predSign===realSign) pts=-2;
-        else pts=-4;
-        p.koPoints += pts;
-      }
-      p.totalPoints += pts;
+// =======================
+// ⏱️ AUTO RUN
+// =======================
+
+// chạy mỗi 60 giây
+setInterval(autoUpdateResults, 60 * 1000);
+
+// chạy ngay lần đầu
+autoUpdateResults();
+// ══════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(btn) btn.classList.add('active');
+  else document.querySelector('.nbtn').classList.add('active');
+}
+
+let toastT;
+function showToast(msg, type='ok') {
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toastIco').textContent=type==='err'?'⚠️':'✅';
+  t.className='toast '+(type==='err'?'err ':'')+'show';
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),3500);
+}
+function notifyAfterMatch(matchIndex) {
+  let winners = [];
+  let losers = [];
+
+  players.forEach(p => {
+    const pred = p.preds[matchIndex];
+    const actual = matches[matchIndex];
+    const pts = calcPts(pred, actual);
+
+    if (pts === 1) winners.push(p.name);
+    if (pts === -4) losers.push(p.name);
+  });
+
+  const winMsgs = [
+    "🎉 {name} đoán chuẩn như VAR!",
+    "🔥 {name} quá đỉnh, đúng tỷ số luôn!",
+    "👏 {name} hôm nay bắt kèo cực chuẩn!",
+    "🏆 {name} chính là thánh dự đoán!",
+    "⚡ {name} đọc trận như sách giáo khoa!"
+  ];
+
+  const loseMsgs = [
+    "😅 {name} hôm nay hơi đen rồi!",
+    "🥲 {name} cần xem lại phong độ!",
+    "📉 {name} đang xuống form nhẹ!",
+    "🤯 {name} đoán kiểu này khó top rồi!",
+    "💀 {name} hôm nay dự đoán hơi… tâm linh!"
+  ];
+
+  function random(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  if (winners.length > 0) {
+    const name = random(winners);
+    const msg = random(winMsgs).replace("{name}", name);
+    showToast(msg, 'ok');
+  } else if (losers.length > 0) {
+    const name = random(losers);
+    const msg = random(loseMsgs).replace("{name}", name);
+    showToast(msg, 'err');
+  }
+}
+  function renderScoreChart() {
+  const container = document.getElementById("chartScore");
+  if (!container) return;
+
+  let html = "<h3>📊 Tổng điểm</h3>";
+
+  players.forEach(p => {
+    const width = Math.max(10, p.total + 100);
+
+    html += `
+      <div style="margin:6px 0">
+        <b>${p.name}</b> (${p.total})
+        <div style="background:#eee;height:10px;">
+          <div style="width:${width}px;height:10px;background:#4caf50;"></div>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+  function renderStatsChart() {
+  const container = document.getElementById("chartStats");
+  if (!container) return;
+
+  let exact = 0, correct = 0, wrong = 0;
+
+  players.forEach(p => {
+    matches.forEach((m, i) => {
+      const pts = calcPts(p.preds[i], m);
+
+      if (pts === 1) exact++;
+      else if (pts === -2) correct++;
+      else if (pts === -4) wrong++;
     });
   });
-  const rf1=state.finalData.realFinalist1?.trim().toLowerCase()||"", rf2=state.finalData.realFinalist2?.trim().toLowerCase()||"", rc=state.finalData.realChampion?.trim().toLowerCase()||"";
-  Object.values(state.players).forEach(p => {
-    let bonus=0;
-    const pf1=p.bonus.finalist1?.toLowerCase()||"", pf2=p.bonus.finalist2?.toLowerCase()||"", pc=p.bonus.champion?.toLowerCase()||"";
-    if(rf1&&rf2){
-      if(pf1===rf1||pf1===rf2) bonus+=5;
-      if(pf2===rf1||pf2===rf2) bonus+=5;
-    } else if(rf1||rf2){ const target=rf1||rf2; if(pf1===target||pf2===target) bonus+=5; }
-    if(rc && pc===rc) bonus+=10;
-    p.bonusPoints=bonus;
-    p.totalPoints+=bonus;
-  });
+
+  const total = exact + correct + wrong || 1;
+
+  const e = Math.round(exact / total * 100);
+  const c = Math.round(correct / total * 100);
+  const w = Math.round(wrong / total * 100);
+
+  container.innerHTML = `
+    <h3>📊 Tỉ lệ dự đoán</h3>
+    <div>Đúng tỷ số: ${e}%</div>
+    <div style="background:#eee;height:10px;margin-bottom:5px;">
+      <div style="width:${e}%;background:#4caf50;height:10px;"></div>
+    </div>
+
+    <div>Đúng kết quả: ${c}%</div>
+    <div style="background:#eee;height:10px;margin-bottom:5px;">
+      <div style="width:${c}%;background:#ff9800;height:10px;"></div>
+    </div>
+
+    <div>Sai: ${w}%</div>
+    <div style="background:#eee;height:10px;">
+      <div style="width:${w}%;background:#f44336;height:10px;"></div>
+    </div>
+  `;
 }
+<!-- 📊 BIỂU ĐỒ (PHẢI ĐẶT NGOÀI SCRIPT) -->
+<div id="chartScore" style="margin-top:20px;"></div>
+<div id="chartStats" style="margin-top:20px;"></div>
 
-function renderBXH(){
-  const sorted = Object.values(state.players).sort((a,b)=>b.totalPoints-a.totalPoints || b.exactScoresVB-a.exactScoresVB);
-  document.getElementById('bxh-body').innerHTML = sorted.map((p,i)=>`<tr><td class="rank-col ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}</td><td class="player-name">${p.name}</td><td class="text-center fw-bold" style="color:var(--gold);">${p.totalPoints}đ</td><td class="text-center">${p.groupPoints}đ</td><td class="text-center">${p.koPoints}đ</td><td class="text-center score-green">${p.exactScoresVB}</td><td class="text-center score-orange">${p.exactResultsVB}</td><td class="text-center">${p.bonusPoints>0?'+'+p.bonusPoints+'đ':'0đ'}</td></tr>`).join('');
-}
+<script>
 
-function renderRealMatchesGrid(){
-  const grid=document.getElementById('real-matches-grid');
-  if(!grid) return;
-  grid.innerHTML = MATCH_DEFINITIONS.map(m => {
-    const res=state.results[m.tt]||{sA:"",sB:""}, locked=state.autoLocked.has(m.tt);
-    return `<div class="match-card"><div class="m-meta"><span>Trận ${m.tt} - ${m.round}</span><button class="lock-btn ${locked?'locked':''}" onclick="toggleLock(${m.tt})">${locked?'🔒':'🔓'}</button></div><div class="m-row"><span class="m-team">${m.teamA}</span><input type="number" class="m-input" id="rsa${m.tt}" value="${res.sA}" oninput="updateRealScore(${m.tt},'sA',this.value)" ${locked?'disabled':''}></div><div class="m-row"><span class="m-team">${m.teamB}</span><input type="number" class="m-input" id="rsb${m.tt}" value="${res.sB}" oninput="updateRealScore(${m.tt},'sB',this.value)" ${locked?'disabled':''}></div></div>`;
-  }).join('');
-}
+// INIT
+renderMatches();
+renderPlayerCards();
 
-window.updateRealScore = (tt,side,val)=>{ if(!state.results[tt]) state.results[tt]={sA:"",sB:""}; state.results[tt][side]=val===""?"":parseInt(val); if(state.results[tt].sA==="" && state.results[tt].sB==="") delete state.results[tt]; persistState(); recalculateAll(); updateRecentPanel(); };
-window.toggleLock = (tt)=>{ if(state.autoLocked.has(tt)) state.autoLocked.delete(tt); else state.autoLocked.add(tt); renderRealMatchesGrid(); persistState(); };
-window.saveFinalSettings = ()=>{ state.finalData.realFinalist1=document.getElementById('realFinalist1').value; state.finalData.realFinalist2=document.getElementById('realFinalist2').value; state.finalData.realChampion=document.getElementById('realChampion').value; persistState(); recalculateAll(); };
-function recalculateAll(){ calculateScores(); renderBXH(); renderPlayerDetails(); updateCharts(); updateRecentPanel(); }
+// 🔥 BẮT BUỘC
+renderScoreChart();
+renderStatsChart();
 
-function renderPlayerDetails(){
-  const name=document.getElementById('player-select')?.value;
-  if(!name||!state.players[name]) return;
-  const p=state.players[name];
-  document.getElementById('det-total-p').innerText=p.totalPoints+"đ";
-  document.getElementById('det-bonus-f').innerText=`${p.bonus.finalist1} vs ${p.bonus.finalist2}`;
-  document.getElementById('det-bonus-c').innerText=p.bonus.champion;
-  const container=document.getElementById('player-matches-list');
-  container.innerHTML=MATCH_DEFINITIONS.map(m=>{
-    const pred=p.predictions[m.tt]||{sA:"-",sB:"-"}, res=state.results[m.tt];
-    let scoreText="", scoreClass="";
-    if(res && res.sA!==""){
-      const isVB=m.tt<=72, realSign=Math.sign(res.sA-res.sB), predSign=Math.sign(pred.sA-pred.sB);
-      if(pred.sA===res.sA && pred.sB===res.sB){ scoreClass="score-green"; scoreText=isVB?"0đ (Đúng tỉ số)":"+1đ (Đúng tỉ số)"; }
-      else if(predSign===realSign){ scoreClass="score-orange"; scoreText=isVB?"-1đ (Sai tỉ số)":"-2đ (Sai tỉ số)"; }
-      else{ scoreClass="score-red"; scoreText=isVB?"-2đ (Sai KQ)":"-4đ (Sai KQ)"; }
-    } else scoreText="Chưa diễn ra";
-    return `<div class="detail-row"><span class="det-tt">#${m.tt}</span><span class="det-teams"><strong>${m.teamA}</strong> vs <strong>${m.teamB}</strong></span><span class="det-pred">${pred.sA}:${pred.sB}</span><span class="det-real">${res?`${res.sA}:${res.sB}`:"-:-"}</span><span class="det-score ${scoreClass}">${scoreText}</span></div>`;
-  }).join('');
-}
-
-function updateRecentPanel(){
-  const panel=document.getElementById('recentPanel'), listDiv=document.getElementById('recentList');
-  const recent=Object.entries(state.results).slice(-6).reverse();
-  if(recent.length===0){ panel.style.display='none'; return; }
-  panel.style.display='block';
-  listDiv.innerHTML=recent.map(([tt,res])=>`<div class="match-result-row"><div class="match-badge">Trận ${tt}</div><div class="match-teams"><strong>${MATCH_DEFINITIONS.find(m=>m.tt==tt)?.teamA||''}</strong> vs <strong>${MATCH_DEFINITIONS.find(m=>m.tt==tt)?.teamB||''}</strong></div><div class="match-score-actual" style="font-weight:bold;color:var(--gold);">${res.sA}:${res.sB}</div><span class="match-round-tag">${MATCH_DEFINITIONS.find(m=>m.tt==tt)?.round||''}</span></div>`).join('');
-}
-
-function initPlayerSelect(){ const sel=document.getElementById('player-select'); if(sel){ sel.innerHTML=PLAYER_NAMES.map(n=>`<option value="${n}">${n}</option>`).join(''); renderPlayerDetails(); } }
-let chart;
-function updateCharts(){ const ctx=document.getElementById('chartScores'); if(!ctx) return; const scores=Object.values(state.players).map(p=>p.totalPoints); if(chart) chart.destroy(); chart=new Chart(ctx,{type:'bar',data:{labels:Object.values(state.players).map(p=>p.name),datasets:[{label:'Tổng Điểm',data:scores,backgroundColor:scores.map(s=>s>=0?'#25a855':'#dc2626'),borderColor:'var(--gold)',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#f0fdf4'}},x:{ticks:{color:'#f0fdf4',font:{size:10}}}}}}); }
-function exportBXHToExcel(){ const rows=[["HẠNG","NGƯỜI CHƠI","TỔNG ĐIỂM","VÒNG BẢNG","KNOCKOUT","ĐÚNG TỈ SỐ VB","ĐÚNG KQ VB","ĐIỂM THƯỞNG"]]; Object.values(state.players).sort((a,b)=>b.totalPoints-a.totalPoints).forEach((p,i)=>rows.push([i+1,p.name,p.totalPoints,p.groupPoints,p.koPoints,p.exactScoresVB,p.exactResultsVB,p.bonusPoints])); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"BangXepHang"); XLSX.writeFile(wb,`WorldCup2026_BXH_${new Date().toISOString().slice(0,10)}.xlsx`); showToast("Xuất file Excel thành công!"); }
-function persistState(){ localStorage.setItem('wc2026_pred_state',JSON.stringify({results:state.results,autoLocked:Array.from(state.autoLocked),finalData:state.finalData})); }
-function loadState(){ try{ const raw=localStorage.getItem('wc2026_pred_state'); if(raw){ const d=JSON.parse(raw); if(d.results) state.results=d.results; if(d.autoLocked) state.autoLocked=new Set(d.autoLocked); if(d.finalData) state.finalData=d.finalData; } }catch(e){} }
-function switchTab(tab,btn){ document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active')); document.getElementById('tab-'+tab).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); }
-function showToast(msg,type='success'){ const t=document.getElementById('toast'); document.getElementById('toastMsg').innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
-
-window.onload=async()=>{ 
-  state.players = buildEmbeddedPlayerData();
-  loadState(); 
-  renderRealMatchesGrid(); 
-  initPlayerSelect(); 
-  updateRecentPanel(); 
-  recalculateAll();
-  await fetchRealResults(false); 
-};
 </script>
 </body>
 </html>
