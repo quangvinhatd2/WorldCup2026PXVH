@@ -209,6 +209,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   0%, 80% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+/* COMMENTARY - lời bình cá nhân sau trận vừa cập nhật */
+.commentary-panel{background:var(--bg2);border:1px solid var(--bdr2);border-radius:14px;padding:14px 18px;margin-bottom:20px;}
+.commentary-panel .sec-title{margin-bottom:8px;border-bottom:none;padding-bottom:0;}
+.cm-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;animation:cmIn .3s ease;}
+.cm-item:last-child{border-bottom:none;}
+.cm-item .cm-ava{width:30px;height:30px;border-radius:50%;background:rgba(37,168,85,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.cm-item.cm-lose .cm-ava{background:rgba(220,38,38,.18);}
+.cm-item .cm-text{color:var(--tx);}
+@keyframes cmIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
@@ -244,6 +254,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <p id="banBody">Nhập kết quả các trận để xem bảng xếp hạng.</p>
       <div class="ban-chips" id="banChips"></div>
     </div>
+  </div>
+
+  <div class="commentary-panel" id="commentaryPanel" style="display:none;">
+    <div class="sec-title">🔥 Soi Kèo Trận Vừa Cập Nhật</div>
+    <div id="commentaryList"></div>
   </div>
 
   <div class="stats">
@@ -637,6 +652,68 @@ function calcBonus(player) {
   showToast("🤝 Trận này ai cũng đoán khá sát 😆", 'ok');
 }
 
+// ══════════════════════════════════════════
+// LỜI BÌNH CÁ NHÂN - hiển thị ngay trên Dashboard
+// ══════════════════════════════════════════
+const personalWinMsgs = [
+  "🎉 {name} đoán chuẩn như VAR!",
+  "🔥 {name} quá đỉnh, đúng tỷ số luôn!",
+  "👏 {name} hôm nay bắt kèo cực chuẩn!",
+  "🏆 {name} chính là thánh dự đoán!",
+  "⚡ {name} đọc trận như sách giáo khoa!"
+];
+
+const personalLoseMsgs = [
+  "😅 {name} hôm nay hơi đen rồi!",
+  "🥲 {name} cần xem lại phong độ!",
+  "📉 {name} đang xuống form nhẹ!",
+  "🤯 {name} đoán kiểu này khó top rồi!",
+  "💀 {name} hôm nay dự đoán hơi… tâm linh!"
+];
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function renderCommentary() {
+  const panel = document.getElementById('commentaryPanel');
+  const list = document.getElementById('commentaryList');
+  if (!panel || !list) return;
+
+  const ttKeys = Object.keys(state.results).map(Number);
+  if (!ttKeys.length) { panel.style.display = 'none'; return; }
+
+  const latestTt = Math.max(...ttKeys);
+  const actual = state.results[latestTt];
+  const match = MATCHES.find(m => m.tt === latestTt);
+  if (!actual || !match) { panel.style.display = 'none'; return; }
+
+  let winners = [], losers = [];
+  Object.entries(PLAYERS_DATA).forEach(([name, player]) => {
+    const pred = player.predictions[latestTt];
+    const pts = calcPts(pred, actual);
+    if (pts === 0) winners.push(name);
+    else if (pts === -2) losers.push(name);
+  });
+
+  if (!winners.length && !losers.length) { panel.style.display = 'none'; return; }
+
+  const shuffle = arr => [...arr].sort(() => 0.5 - Math.random());
+
+  let html = '';
+  shuffle(winners).forEach(name => {
+    const msg = pickRandom(personalWinMsgs).replace('{name}', name);
+    html += `<div class="cm-item cm-win"><div class="cm-ava">🏆</div><div class="cm-text">${msg}</div></div>`;
+  });
+  shuffle(losers).slice(0, 5).forEach(name => {
+    const msg = pickRandom(personalLoseMsgs).replace('{name}', name);
+    html += `<div class="cm-item cm-lose"><div class="cm-ava">😅</div><div class="cm-text">${msg}</div></div>`;
+  });
+
+  list.innerHTML = html;
+  panel.style.display = 'block';
+}
+
 function calculate() {
   state.lb = Object.entries(PLAYERS_DATA).map(([name, player]) => {
     let total = 0, correct = 0, exactScore = 0, wrong = 0, played = 0;
@@ -711,6 +788,8 @@ function showTopChange(name) {
 // RENDER DASHBOARD
 // ══════════════════════════════════════════
 function renderDashboard() {
+  renderCommentary();
+
   const played = Object.keys(state.results).length;
   document.getElementById('sMt').textContent = played;
 
