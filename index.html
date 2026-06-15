@@ -213,6 +213,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 /* COMMENTARY - lời bình cá nhân sau trận vừa cập nhật */
 .commentary-panel{background:var(--bg2);border:1px solid var(--bdr2);border-radius:14px;padding:14px 18px;margin-bottom:20px;}
 .commentary-panel .sec-title{margin-bottom:8px;border-bottom:none;padding-bottom:0;}
+#commentaryList{max-height:360px;overflow-y:auto;}
 .cm-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;animation:cmIn .3s ease;}
 .cm-item:last-child{border-bottom:none;}
 .cm-item .cm-ava{width:30px;height:30px;border-radius:50%;background:rgba(37,168,85,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
@@ -688,26 +689,25 @@ function renderCommentary() {
   const match = MATCHES.find(m => m.tt === latestTt);
   if (!actual || !match) { panel.style.display = 'none'; return; }
 
-  let winners = [], losers = [];
+  // Mọi người chơi đều có lời bình: pts 0 hoặc -1 -> "khá", pts -2 -> "đen"
+  let entries = [];
   Object.entries(PLAYERS_DATA).forEach(([name, player]) => {
     const pred = player.predictions[latestTt];
     const pts = calcPts(pred, actual);
-    if (pts === 0) winners.push(name);
-    else if (pts === -2) losers.push(name);
+    if (pts === null || pts === -99) return; // không có dự đoán / chưa có KQ
+    entries.push({ name, win: pts >= -1 });
   });
 
-  if (!winners.length && !losers.length) { panel.style.display = 'none'; return; }
+  if (!entries.length) { panel.style.display = 'none'; return; }
 
   const shuffle = arr => [...arr].sort(() => 0.5 - Math.random());
 
   let html = '';
-  shuffle(winners).forEach(name => {
-    const msg = pickRandom(personalWinMsgs).replace('{name}', name);
-    html += `<div class="cm-item cm-win"><div class="cm-ava">🏆</div><div class="cm-text">${msg}</div></div>`;
-  });
-  shuffle(losers).slice(0, 5).forEach(name => {
-    const msg = pickRandom(personalLoseMsgs).replace('{name}', name);
-    html += `<div class="cm-item cm-lose"><div class="cm-ava">😅</div><div class="cm-text">${msg}</div></div>`;
+  shuffle(entries).forEach(({name, win}) => {
+    const msg = win
+      ? pickRandom(personalWinMsgs).replace('{name}', name)
+      : pickRandom(personalLoseMsgs).replace('{name}', name);
+    html += `<div class="cm-item ${win ? 'cm-win' : 'cm-lose'}"><div class="cm-ava">${win ? '🏆' : '😅'}</div><div class="cm-text">${msg}</div></div>`;
   });
 
   list.innerHTML = html;
