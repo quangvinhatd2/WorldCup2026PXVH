@@ -213,12 +213,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 /* COMMENTARY - lời bình cá nhân sau trận vừa cập nhật */
 .commentary-panel{background:var(--bg2);border:1px solid var(--bdr2);border-radius:14px;padding:14px 18px;margin-bottom:20px;}
 .commentary-panel .sec-title{margin-bottom:8px;border-bottom:none;padding-bottom:0;}
-#commentaryList{max-height:360px;overflow-y:auto;}
+#commentaryList{max-height:360px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--gold) var(--sur);}
+#commentaryList::-webkit-scrollbar{width:7px;}
+#commentaryList::-webkit-scrollbar-track{background:var(--sur);border-radius:8px;}
+#commentaryList::-webkit-scrollbar-thumb{background:var(--gold);border-radius:8px;}
+#commentaryList::-webkit-scrollbar-thumb:hover{background:var(--goldl);}
 .cm-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;animation:cmIn .3s ease;}
 .cm-item:last-child{border-bottom:none;}
 .cm-item .cm-ava{width:30px;height:30px;border-radius:50%;background:rgba(37,168,85,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .cm-item.cm-lose .cm-ava{background:rgba(220,38,38,.18);}
+.cm-item.cm-mid .cm-ava{background:rgba(240,180,41,.18);}
 .cm-item .cm-text{color:var(--tx);}
+.cm-mvp{background:linear-gradient(135deg,rgba(240,180,41,.2),rgba(240,180,41,.05));border:1px solid var(--gold);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;animation:cmIn .4s ease;}
+.cm-mvp .cm-mvp-ico{font-size:22px;flex-shrink:0;}
+.cm-mvp .cm-mvp-text{font-weight:700;font-size:14px;color:var(--goldl);}
 @keyframes cmIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
@@ -656,20 +664,59 @@ function calcBonus(player) {
 // ══════════════════════════════════════════
 // LỜI BÌNH CÁ NHÂN - hiển thị ngay trên Dashboard
 // ══════════════════════════════════════════
-const personalWinMsgs = [
+
+// pts = 0: đoán đúng tỷ số (đỉnh nhất)
+const msgsExact = [
   "🎉 {name} đoán chuẩn như VAR!",
   "🔥 {name} quá đỉnh, đúng tỷ số luôn!",
   "👏 {name} hôm nay bắt kèo cực chuẩn!",
   "🏆 {name} chính là thánh dự đoán!",
-  "⚡ {name} đọc trận như sách giáo khoa!"
+  "⚡ {name} đọc trận như sách giáo khoa!",
+  "💯 {name} là tiên tri World Cup luôn rồi!",
+  "🐐 {name} GOAT dự đoán mùa này!",
+  "🎯 {name} bắn trúng tâm, không lệch 1mm!",
+  "🧙 {name} có giác quan thứ 6 hay sao vậy?!",
+  "📸 {name} chụp y nguyên tỷ số luôn!",
+  "🚀 {name} bay xa với pha đoán này!",
+  "🔮 {name} xem bói trận đấu giỏi thật!"
 ];
 
-const personalLoseMsgs = [
+// pts = -1: đúng kết quả (thắng/thua/hòa) nhưng sai tỷ số
+const msgsDirection = [
+  "👍 {name} đoán đúng hướng, chỉ lệch tỷ số chút!",
+  "🤏 {name} sát nút quá, thiếu 1 ly nữa thôi!",
+  "📐 {name} định hướng tốt, chỉ chưa căn đúng số!",
+  "👌 {name} chọn đúng kèo, điểm số thì hên xui chút!",
+  "🙂 {name} đi đúng đường, chỉ thiếu chút may mắn!",
+  "📊 {name} phân tích đúng xu hướng trận này!",
+  "🥈 {name} suýt nữa thì ăn trọn điểm rồi!",
+  "🤔 {name} đoán đúng kết quả, tỷ số thì... để lần sau!",
+  "✅ {name} giữ được điểm an toàn trận này!",
+  "🎯 {name} bắn trúng vòng ngoài, tâm thì gần rồi!"
+];
+
+// pts = -2: sai hoàn toàn
+const msgsWrong = [
   "😅 {name} hôm nay hơi đen rồi!",
   "🥲 {name} cần xem lại phong độ!",
   "📉 {name} đang xuống form nhẹ!",
   "🤯 {name} đoán kiểu này khó top rồi!",
-  "💀 {name} hôm nay dự đoán hơi… tâm linh!"
+  "💀 {name} hôm nay dự đoán hơi… tâm linh!",
+  "🙈 {name} dự đoán này chắc đọc lịch âm rồi!",
+  "🎲 {name} chơi xổ số à?",
+  "🌧️ {name} hôm nay vận xui ghé thăm!",
+  "🔄 {name} đoán ngược trận này luôn!",
+  "🫠 {name} pha này coi như mất điểm rồi!",
+  "🤡 {name} hôm nay nhường sân cho người khác toả sáng!",
+  "📵 {name} chắc quên không xem trước trận này!"
+];
+
+// MVP highlight - người đoán đúng tỷ số trận vừa cập nhật
+const msgsMVP = [
+  "⭐ MVP trận này: {name}!",
+  "👑 Vua dự đoán trận này: {name}!",
+  "🌟 Người chơi sáng nhất trận: {name}!",
+  "🎖️ Soi kèo đỉnh nhất: {name}!"
 ];
 
 function pickRandom(arr) {
@@ -689,13 +736,13 @@ function renderCommentary() {
   const match = MATCHES.find(m => m.tt === latestTt);
   if (!actual || !match) { panel.style.display = 'none'; return; }
 
-  // Mọi người chơi đều có lời bình: pts 0 hoặc -1 -> "khá", pts -2 -> "đen"
+  // Mọi người chơi đều có lời bình, phân theo pts: 0 / -1 / -2
   let entries = [];
   Object.entries(PLAYERS_DATA).forEach(([name, player]) => {
     const pred = player.predictions[latestTt];
     const pts = calcPts(pred, actual);
     if (pts === null || pts === -99) return; // không có dự đoán / chưa có KQ
-    entries.push({ name, win: pts >= -1 });
+    entries.push({ name, pts });
   });
 
   if (!entries.length) { panel.style.display = 'none'; return; }
@@ -703,11 +750,22 @@ function renderCommentary() {
   const shuffle = arr => [...arr].sort(() => 0.5 - Math.random());
 
   let html = '';
-  shuffle(entries).forEach(({name, win}) => {
-    const msg = win
-      ? pickRandom(personalWinMsgs).replace('{name}', name)
-      : pickRandom(personalLoseMsgs).replace('{name}', name);
-    html += `<div class="cm-item ${win ? 'cm-win' : 'cm-lose'}"><div class="cm-ava">${win ? '🏆' : '😅'}</div><div class="cm-text">${msg}</div></div>`;
+
+  // MVP: random 1 người trong số đoán đúng tỷ số (nếu có)
+  const exactPlayers = entries.filter(e => e.pts === 0);
+  if (exactPlayers.length) {
+    const mvp = pickRandom(exactPlayers);
+    const mvpMsg = pickRandom(msgsMVP).replace('{name}', mvp.name);
+    html += `<div class="cm-mvp"><div class="cm-mvp-ico">⭐</div><div class="cm-mvp-text">${mvpMsg}</div></div>`;
+  }
+
+  shuffle(entries).forEach(({name, pts}) => {
+    let msgArr, ico, cls;
+    if (pts === 0) { msgArr = msgsExact; ico = '🏆'; cls = 'cm-win'; }
+    else if (pts === -1) { msgArr = msgsDirection; ico = '👌'; cls = 'cm-mid'; }
+    else { msgArr = msgsWrong; ico = '😅'; cls = 'cm-lose'; }
+    const msg = pickRandom(msgArr).replace('{name}', name);
+    html += `<div class="cm-item ${cls}"><div class="cm-ava">${ico}</div><div class="cm-text">${msg}</div></div>`;
   });
 
   list.innerHTML = html;
